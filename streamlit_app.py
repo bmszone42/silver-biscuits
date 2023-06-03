@@ -7,6 +7,13 @@ from pptx import Presentation
 import base64
 import openai
 from collections.abc import Iterable
+from tiktoken import Tokenizer
+
+MAX_TOKENS = 4096  # Maximum tokens allowed in a single API call
+TOKENS_PER_SLIDE_ESTIMATE = 100  # Rough estimate of tokens used per slide
+
+# Initialize tokenizer
+tokenizer = Tokenizer()
 
 # Set OpenAI API key
 openai.api_key = st.secrets['OPENAI_KEY']
@@ -139,45 +146,41 @@ def get_download_link(file_path):
     b64 = base64.b64encode(data).decode()
     return f'<a href="data:application/octet-stream;base64,{b64}" download="{file_path}">Download file</a>'
 
+def calculate_tokens(text):
+    tokens = list(tokenizer.tokenize(text))
+    return len(tokens)
+
 def main():
+    st.title('PowerPoint Presentation Creator')
+
     # Step 1: Allow user to enter a topic
-    if 'topic' not in st.session_state:
-        st.session_state['topic'] = ''
-    topic = st.sidebar.text_input('Topic', value=st.session_state['topic'])
-    st.session_state['topic'] = topic
+    topic = st.sidebar.text_input('Topic')
 
     # Step 2: Allow the user to select n charts for the outline
-    if 'num_slides' not in st.session_state:
-        st.session_state['num_slides'] = 1
-    num_slides = st.sidebar.number_input('Number of slides', min_value=1, value=st.session_state['num_slides'])
-    st.session_state['num_slides'] = num_slides
+    num_slides = st.sidebar.number_input('Number of slides', min_value=1)
+
+    # Calculate estimated tokens
+    estimated_tokens = num_slides * TOKENS_PER_SLIDE_ESTIMATE
+    st.sidebar.write(f'Estimated tokens to be used: {estimated_tokens}')
 
     # Step 3: Generate the outline upon pressing Generate Outline
     if st.sidebar.button('Generate Outline'):
-        st.session_state['outline'] = generate_outline(topic, num_slides)
+        outline = generate_outline(topic, num_slides)
+        st.session_state['outline'] = outline
 
-    # Check if the outline was successfully generated
-    if 'outline' in st.session_state and st.session_state['outline'] and isinstance(st.session_state['outline'], list):
         # Step 4: Display the outline in the sidebar
         st.sidebar.write('Generated Outline:')
-        for slide_title in st.session_state['outline']:
+        for slide_title in outline:
             st.sidebar.write(f'- {slide_title}')
 
-        # Step 5: Allow the user to approve the Outline
-        if 'approved' not in st.session_state:
-            st.session_state['approved'] = False
-        st.session_state['approved'] = st.sidebar.checkbox('Approve Outline', value=st.session_state['approved'])
+    # Step 5: Allow the user to approve the Outline
+    if st.sidebar.button('Approve Outline'):
+        st.session_state['approved'] = True
 
-        # Step 6: If the Outline is approved, generate a python dictionary with content for the presentation
-        if st.session_state['approved']:
-            slides_content = []
-            for slide_title in st.session_state['outline']:
-                st.write(f"Generating slide content for: {slide_title}")
-                slide_content = generate_slide_content(slide_title)
-                slides_content.append(slide_content)
-
-                # Display the slide content dictionary
-                st.write(f"Slide Content: {slide_content}")
+    # If the Outline is approved
+    if 'approved' in st.session_state and st.session_state['approved']:
+        if st.sidebar.button('Approve Token Usage'):
+            slides_content = generate_content_as_per_token_usage()
 
             # Step 8: Prompt the user to enter their presenter name, presentation title, and company name
             st.sidebar.title('Presentation Details')
@@ -185,22 +188,42 @@ def main():
             presentation_name = st.sidebar.text_input('Presentation name', 'Presentation')
             presenter = st.sidebar.text_input('Presenter', 'Presenter')
 
-            # Step 9: Show the "Create Presentation" button
+            # Check if all details are entered
             if company_name and presentation_name and presenter:
+                # Step 9: Show the "Create Presentation" button
                 if st.sidebar.button('Create Presentation'):
                     create_presentation(slides_content, company_name, presentation_name, presenter)
                     st.success('Presentation created successfully!')
-                    
+
                     # Step 10: Allow the user to download the presentation with a link
                     download_link = get_download_link("SlideDeck.pptx")
                     st.markdown(download_link, unsafe_allow_html=True)
 
-            else:
-                st.sidebar.warning('Please enter all the presentation details.')
+def generate_content_as_per_token_usage():
+    slides_content = []
 
-                
-            if st.sidebar.button('Reset'):
-                st.session_state.clear()
+    batch_slide_titles = []
+    tokens_in_batch = 0
+
+    for i, slide_title in enumerate(st.session_state['outline']):
+        tokens_for_slide = calculate_tokens(slide_title)
+
+        if tokens_in_batch + tokens_for_slide > MAX_TOKENS:
+            slide_content_batch = generate_slide_content(batch_slide_titles)
+            slides_content.extend(slide_content_batch)
+
+            batch_slide_titles = [slide_title]
+            tokens_in_batch = tokens_for_slide
+        else:
+            batch_slide_titles.append(slide_title)
+            tokens_in_batch += tokens_for_slide
+
+    # Generate content for the last batch
+    if batch_slide_titles:
+        slide_content_batch = generate_slide_content(batch_slide_titles)
+        slides_content.extend(slide_content_batch)
+
+    return slides_content
 
 if __name__ == "__main__":
     main()
