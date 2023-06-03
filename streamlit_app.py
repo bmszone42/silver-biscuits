@@ -167,21 +167,17 @@ def main():
             presentation_name = st.sidebar.text_input('Presentation name', 'Presentation')
             presenter = st.sidebar.text_input('Presenter', 'Presenter')
 
-            # Step 7: If the user approves the outline, create a presentation in pptx format
-            if st.button('Create Presentation'):
-                create_presentation(slides_content, company_name, presentation_name, presenter)
-                st.success('Presentation created successfully!')
+    # Step 7: If the user approves the outline, create a presentation in pptx format
+    if st.button('Create Presentation') and approved:
+        create_presentation(slides_content, company_name, presentation_name, presenter)
+        st.success('Presentation created successfully!')
 
-                # Step 8: Allow the user to download the presentation with a link
-                download_link = get_download_link("SlideDeck.pptx")
-                st.markdown(download_link, unsafe_allow_html=True)
-
-                return  # Exit the function to prevent further execution
-
-    # Additional code logic here if the outline is not approved or no action is taken
-    # ...
+        # Step 8: Allow the user to download the presentation with a link
+        download_link = get_download_link("SlideDeck.pptx")
+        st.markdown(download_link, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
+
 
 
