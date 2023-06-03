@@ -71,25 +71,29 @@ def main():
 
     st.write('Please paste your Python dictionary here.')
     user_input = st.text_area("Paste your dictionary here", "{}")
+    
+    # Add the Make Presentation button
+    button_clicked = st.button('Make Presentation')
 
-    try:
-        # The content is evaluated as a Python dictionary
-        slides_content = ast.literal_eval(user_input)
+    if button_clicked:
+        try:
+            # The content is evaluated as a Python dictionary
+            slides_content = ast.literal_eval(user_input)
 
-        company_name = "MitoSense"
-        presentation_name = "Mitochondrial Frontiers: Exploring the Role of Mitochondria Organelle Transplantation in Spaceflight and Neurodegeneration"
-        presenter = "Brent Segal, PhD"
+            company_name = "MitoSense"
+            presentation_name = "Mitochondrial Frontiers: Exploring the Role of Mitochondria Organelle Transplantation in Spaceflight and Neurodegeneration"
+            presenter = "Brent Segal, PhD"
 
-        create_presentation(slides_content, company_name, presentation_name, presenter)
+            create_presentation(slides_content, company_name, presentation_name, presenter)
 
-        st.success('Presentation created successfully!')
-        
-        # Provide download link
-        download_link = get_download_link("MitoSense for Space.pptx")
-        st.markdown(download_link, unsafe_allow_html=True)
+            st.success('Presentation created successfully!')
 
-    except Exception as e:
-        st.error(f'Error parsing dictionary: {e}')
+            # Provide download link
+            download_link = get_download_link("MitoSense for Space.pptx")
+            st.markdown(download_link, unsafe_allow_html=True)
+
+        except Exception as e:
+            st.error(f'Error parsing dictionary: {e}')
 
 if __name__ == "__main__":
     main()
