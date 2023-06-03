@@ -1,5 +1,3 @@
-# app.py
-
 import streamlit as st
 import ast
 from pptx.util import Inches, Pt
@@ -26,7 +24,7 @@ def generate_slide_content(title, engine):
 
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt=f"Generate slide content for the title: '{title}'\n\nThree poignant and useful bullets:\n1.",
+        prompt=f"Generate slide content for the title: '{title}'\n\nCreate {n} poignant and useful bullets of 12-14 words each:\n1.",
         temperature=0.5,
         max_tokens=30,
         n=3
@@ -35,7 +33,7 @@ def generate_slide_content(title, engine):
 
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt=f"Generate slide content for the title: '{title}'\n\nShort takeaway message (8 words or less):",
+        prompt=f"Generate slide content for the title: '{title}'\n\nCreate {n} short takeaway message of 8 words or less:",
         temperature=0.5,
         max_tokens=10,
         n=1
@@ -44,7 +42,7 @@ def generate_slide_content(title, engine):
 
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt=f"Generate slide content for the title: '{title}'\n\nFive detailed talking points (50 words each):\n1.",
+        prompt=f"Generate slide content for the title: '{title}'\n\n Create {n} detailed talking points of 30-40 words each:\n1.",
         temperature=0.5,
         max_tokens=60,
         n=5
