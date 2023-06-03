@@ -170,5 +170,10 @@ def main():
             download_link = get_download_link("SlideDeck.pptx")
             st.markdown(download_link, unsafe_allow_html=True)
 
+            return  # Exit the function to prevent further execution
+
+    # Additional code logic here if the outline is not approved or no action is taken
+    # ...
+
 if __name__ == "__main__":
     main()
