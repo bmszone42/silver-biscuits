@@ -150,12 +150,13 @@ def reset_all():
 def format_slide_content(slide_content):
     formatted_content = ""
     for key, value in slide_content.items():
-        formatted_content += f"{key.capitalize()}:\n"
+        formatted_content += f"{key.capitalize()}:\n"  # Add ':' here if you want to separate the key from the value with a colon
         if isinstance(value, Iterable) and not isinstance(value, str):
             for i, item in enumerate(value, start=1):
                 formatted_content += f"  {i}. {item}\n"
         else:
-            formatted_content += f"  {value}\n"
+            formatted_content += f"  {value}\n"  # Add '\n' here to start value from a new line
+        formatted_content += "\n"  # Add '\n' here to create a space between different key-value pairs
     return formatted_content
 
 def setup_app_title():
@@ -254,14 +255,14 @@ def main():
             # Display the slide content in a formatted manner
             st.write(f"Slide Content:\n{format_slide_content(slide_content)}")
 
-            # Step 10: Show the "Create Presentation" button
-            if st.sidebar.button('Create Presentation'):
-                create_presentation(slides_content, company_name, presentation_name, presenter)
-                st.success('Presentation created successfully!')
+    # Step 10: Show the "Create Presentation" button
+    if st.sidebar.button('Create Presentation'):
+        create_presentation(slides_content, company_name, presentation_name, presenter)
+        st.success('Presentation created successfully!')
 
-                # Step 11: Allow the user to download the presentation with a link
-                download_link = get_download_link("SlideDeck.pptx")
-                st.markdown(download_link, unsafe_allow_html=True)
+        # Step 11: Allow the user to download the presentation with a link
+        download_link = get_download_link("SlideDeck.pptx")
+        st.markdown(download_link, unsafe_allow_html=True)
 
      # Reset Button
     if st.sidebar.button('Reset'):
