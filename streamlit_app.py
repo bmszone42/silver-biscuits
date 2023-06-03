@@ -147,15 +147,17 @@ def main():
         # Step 5: Allow the user to approve the Outline or generate a new outline
         approved = st.button('Approve Outline')
         if not approved:
+            st.write("Outline not approved. Please generate a new outline.")
             return
 
         # Step 6: If the Outline is approved, generate a python dictionary with content for the presentation
         slides_content = []
         for slide_title in outline:
+            st.write(f"Generating slide content for: {slide_title}")
             slide_content = generate_slide_content(slide_title)
             slides_content.append(slide_content)
             # Display the slide content dictionary
-            st.code(slide_content, language='python')
+            st.write(f"Slide Content: {slide_content}")
 
         # Step 7: Prompt the user to enter their presenter name, presentation title, and company name
         st.sidebar.title('Presentation Details')
@@ -179,4 +181,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
