@@ -139,8 +139,9 @@ def get_download_link(file_path):
     return f'<a href="data:application/octet-stream;base64,{b64}" download="{file_path}">Download file</a>'
 
 def main():
-    st.title('PowerPoint Presentation Creator')
-
+    
+    st.title('Presentation Creator')
+    
     # Step 1: Allow user to enter a topic
     topic = st.sidebar.text_input('Topic')
 
@@ -148,49 +149,51 @@ def main():
     num_slides = st.sidebar.number_input('Number of slides', min_value=1)
 
     # Step 3: Generate the outline upon pressing Generate Outline
-if st.sidebar.button('Generate Outline'):
-    outline = generate_outline(topic, num_slides)
-    
-    if outline is None or not isinstance(outline, Iterable):
-        st.sidebar.write('Failed to generate an outline. Please check your input.')
-        return  # stop further execution
+    if st.sidebar.button('Generate Outline'):
+        outline = generate_outline(topic, num_slides)
 
-    # Step 4: Display the outline in the sidebar
-    st.sidebar.write('Generated Outline:')
-    for slide_title in outline:
-        st.sidebar.write(f'- {slide_title}')
+        # Check if the outline was successfully generated
+        if not outline or not isinstance(outline, list):
+            st.sidebar.write('Failed to generate an outline. Please check your input.')
+        else:
+            # Step 4: Display the outline in the sidebar
+            st.sidebar.write('Generated Outline:')
+            for slide_title in outline:
+                st.sidebar.write(f'- {slide_title}')
 
-    # Step 5: Allow the user to approve the Outline
-    approved = st.sidebar.checkbox('Approve Outline')
+            # Step 5: Allow the user to approve the Outline
+            approved = st.sidebar.checkbox('Approve Outline')
 
-    # Step 6: If the Outline is approved, generate a python dictionary with content for the presentation
-    if approved:
-        # Step 7: Generate slide content for each slide title in the outline
-        slides_content = []
-        for slide_title in outline:
-            st.write(f"Generating slide content for: {slide_title}")
-            slide_content = generate_slide_content(slide_title)
-            slides_content.append(slide_content)
-            # Display the slide content dictionary
-            st.write(f"Slide Content: {slide_content}")
+            # Step 6: If the Outline is approved, generate a python dictionary with content for the presentation
+            if approved:
+                slides_content = []
+                for slide_title in outline:
+                    st.write(f"Generating slide content for: {slide_title}")
+                    slide_content = generate_slide_content(slide_title)
+                    slides_content.append(slide_content)
 
-        # Step 8: Prompt the user to enter their presenter name, presentation title, and company name
-        st.sidebar.title('Presentation Details')
-        company_name = st.sidebar.text_input('Company name', 'Company')
-        presentation_name = st.sidebar.text_input('Presentation name', 'Presentation')
-        presenter = st.sidebar.text_input('Presenter', 'Presenter')
+                    # Display the slide content dictionary
+                    st.write(f"Slide Content: {slide_content}")
 
-        # Step 9: Show the "Create Presentation" button
-        if st.sidebar.button('Create Presentation'):
-            create_presentation(slides_content, company_name, presentation_name, presenter)
-            st.success('Presentation created successfully!')
+                # Step 8: Prompt the user to enter their presenter name, presentation title, and company name
+                st.sidebar.title('Presentation Details')
+                company_name = st.sidebar.text_input('Company name', 'Company')
+                presentation_name = st.sidebar.text_input('Presentation name', 'Presentation')
+                presenter = st.sidebar.text_input('Presenter', 'Presenter')
 
-            # Step 10: Allow the user to download the presentation with a link
-            download_link = get_download_link("SlideDeck.pptx")
-            st.markdown(download_link, unsafe_allow_html=True)
+                # Step 9: Show the "Create Presentation" button
+                if st.sidebar.button('Create Presentation'):
+                    create_presentation(slides_content, company_name, presentation_name, presenter)
+                    st.success('Presentation created successfully!')
+
+                    # Step 10: Allow the user to download the presentation with a link
+                    download_link = get_download_link("SlideDeck.pptx")
+                    st.markdown(download_link, unsafe_allow_html=True)
+
 
 if __name__ == "__main__":
     main()
+
 
 
 
