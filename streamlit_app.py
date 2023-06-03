@@ -63,7 +63,7 @@ def generate_outline(topic, num_slides):
         prompt=f"Generate {num_slides} slide titles for a presentation on the topic: '{topic}'.\n\n",
         temperature=0.5,
         max_tokens=100,
-        n=num_slides
+        n=1
     )
     outline = [choice.text.strip() for choice in response.choices]
     
