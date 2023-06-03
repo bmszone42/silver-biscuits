@@ -69,7 +69,7 @@ def generate_outline(topic, num_slides, engine):
         max_tokens=10 * num_slides,  # Adjusted this to give the model more space to generate titles
         n=1
     )
-    
+
     # Extract the text from the single completion choice
     generated_text = response.choices[0].text.strip()
 
@@ -77,10 +77,13 @@ def generate_outline(topic, num_slides, engine):
     # This assumes that the generated text contains slide titles separated by newlines
     outline = generated_text.split('\n')
 
+    # Remove the "Slide 1:", "Slide 2:", etc. prefixes
+    outline = [slide[slide.find(":")+1:].strip() for slide in outline]
+
     # Make sure that the number of slide titles matches num_slides
     if len(outline) != num_slides:
         print(f"Warning: Expected {num_slides} slide titles but received {len(outline)}")
-    
+
     return outline
 
 
