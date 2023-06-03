@@ -60,7 +60,7 @@ def generate_slide_content(title):
 def generate_outline(topic, num_slides):
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt=f"Generate outline for a presentation on the topic: '{topic}' with {num_slides} slides.\n\nSlide title:",
+        prompt=f"Generate slide titles for a presentation on the topic: '{topic}' with {num_slides} slides.\n\nSlide title:",
         temperature=0.5,
         max_tokens=100,
         n=num_slides
