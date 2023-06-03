@@ -7,7 +7,7 @@ import openai
 from collections.abc import Iterable
 
 MAX_TOKENS = 4096  # Maximum tokens allowed in a single API call
-TOKENS_PER_SLIDE_ESTIMATE = 100  # Rough estimate of tokens used per slide
+TOKENS_PER_SLIDE_ESTIMATE = 200  # Rough estimate of tokens used per slide
 
 # Set OpenAI API key
 openai.api_key = st.secrets['OPENAI_KEY']
@@ -26,7 +26,7 @@ def generate_slide_content(title, engine):
         engine="text-davinci-003",
         prompt=f"Generate slide content for the title: '{title}'\n\nCreate Three poignant and useful bullets of 12-14 words each:\n1.",
         temperature=0.5,
-        max_tokens=30,
+        max_tokens=50,
         n=1
     )
     bullets = [bullet.text.strip() for bullet in response.choices]
@@ -44,7 +44,7 @@ def generate_slide_content(title, engine):
         engine="text-davinci-003",
         prompt=f"Generate slide content for the title: '{title}'\n\n Create Five detailed talking points of 30-40 words each:\n1.",
         temperature=0.5,
-        max_tokens=60,
+        max_tokens=100,
         n=1
     )
     talking_points = [point.text.strip() for point in response.choices]
@@ -63,7 +63,7 @@ def generate_outline(topic, num_slides, engine):
         engine="text-davinci-003",
         prompt=f"Generate {num_slides} slide titles for a presentation on the topic: '{topic}'.\n\n",
         temperature=0.5,
-        max_tokens=10 * num_slides,  # Adjusted this to give the model more space to generate titles
+        max_tokens=20 * num_slides,  # Adjusted this to give the model more space to generate titles
         n=1
     )
 
