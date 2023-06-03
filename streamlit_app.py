@@ -189,7 +189,7 @@ def main():
     setup_app_title()
     setup_sidebar_style()
     # Step 1: Allow user to enter a topic
-    powerpoint_topic = st.sidebar.text_input('Topic for the PowerPoint Deck')
+    presentation_topic = st.sidebar.text_input('Topic for the PowerPoint Deck')
 
     # Step 2: Allow the user to select n charts for the outline
     num_slides = st.sidebar.number_input('Number of slides', min_value=1)
