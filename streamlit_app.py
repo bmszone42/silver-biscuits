@@ -15,7 +15,7 @@ def generate_slide_content(title):
         engine="text-davinci-003",
         prompt=f"Generate slide content for the title: '{title}'\n\nShort crisp title:",
         temperature=0.5,
-        max_tokens=10,
+        max_tokens=100,
         n=1
     )
     crisp_title = response.choices[0].text.strip()
@@ -24,7 +24,7 @@ def generate_slide_content(title):
         engine="text-davinci-003",
         prompt=f"Generate slide content for the title: '{title}'\n\nThree poignant and useful bullets:\n1.",
         temperature=0.5,
-        max_tokens=30,
+        max_tokens=50,
         n=3
     )
     bullets = [bullet.strip() for bullet in response.choices]
