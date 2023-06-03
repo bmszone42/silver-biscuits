@@ -7,6 +7,19 @@ from pptx.util import Inches, Pt
 from pptx import Presentation
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 import base64
+import openai
+
+def generate_outline(topic, num_slides):
+    response = openai.Completion.create(
+      engine="text-davinci-003",
+      prompt=f"Create an outline for a presentation on the topic of '{topic}' with {num_slides} slides.",
+      temperature=0.5,
+      max_tokens=60
+    )
+
+    outline = response.choices[0].text.strip().split('\n')
+    return outline
+
 
 def create_presentation(slides_content, company_name, presentation_name, presenter):
     # Initialize a Presentation object
@@ -68,6 +81,39 @@ def get_download_link(file_path):
 
 def main():
     st.title('PowerPoint Presentation Creator')
+    
+    # Ask for the topic and number of slides
+topic = st.sidebar.text_input('Topic')
+num_slides = st.sidebar.number_input('Number of slides', min_value=1)
+
+# When the user clicks the "Generate Outline" button, generate the outline
+if st.sidebar.button('Generate Outline'):
+    outline = generate_outline(topic, num_slides)
+    
+    # Store the outline in a session state variable so it persists across runs
+    st.session_state['outline'] = outline
+
+    # Display checkboxes for each item in the outline
+    st.session_state['include_slide'] = []
+    for i, slide_title in enumerate(outline):
+        include_slide = st.checkbox(f'Include "{slide_title}" in the presentation?', key=f'include_slide_{i}')
+        st.session_state['include_slide'].append(include_slide)
+        
+        # Allow the user to edit the title
+        edited_title = st.text_input('Edit the slide title', slide_title, key=f'edited_title_{i}')
+        if edited_title != slide_title:
+            outline[i] = edited_title
+            
+    # When the user clicks the "Generate Presentation" button, generate the presentation
+    if st.button('Generate Presentation'):
+        # Use only the titles that the user checked
+        slide_titles = [title for include, title in zip(st.session_state['include_slide'], outline) if include]
+        
+        # Generate the presentation dictionary
+        presentation = generate_presentation(slide_titles)
+        
+        # Display the presentation dictionary
+        st.code(presentation, language='json')
 
     # Add input fields in sidebar
     st.sidebar.title('Presentation Details')
