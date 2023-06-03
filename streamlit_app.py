@@ -62,22 +62,23 @@ def create_presentation(slides_content, company_name, presentation_name, present
 def main():
     st.title('PowerPoint Presentation Creator')
 
-    st.write('Please upload your Python dictionary file.')
-    uploaded_file = st.file_uploader("Choose a file", type=["txt"])
+    st.write('Please paste your Python dictionary here.')
+    user_input = st.text_area("Paste your dictionary here", "{}")
 
-    if uploaded_file is not None:
-        # The file is opened and read into a variable
-        file_content = uploaded_file.getvalue().decode("utf-8")
+    try:
         # The content is evaluated as a Python dictionary
-        slides_content = ast.literal_eval(file_content)
+        slides_content = ast.literal_eval(user_input)
 
         company_name = "MitoSense"
         presentation_name = "Mitochondrial Frontiers: Exploring the Role of Mitochondria Organelle Transplantation in Spaceflight and Neurodegeneration"
-        presenter = "Brent Segal"
+        presenter = "Brent Segal, PhD"
 
         create_presentation(slides_content, company_name, presentation_name, presenter)
 
         st.success('Presentation created successfully!')
+
+    except Exception as e:
+        st.error(f'Error parsing dictionary: {e}')
 
 if __name__ == "__main__":
     main()
