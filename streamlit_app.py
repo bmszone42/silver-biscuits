@@ -7,13 +7,10 @@ from pptx import Presentation
 import base64
 import openai
 from collections.abc import Iterable
-from tiktoken.Tokenizer import Tokenizer
+from tiktoken import TikToken
 
 MAX_TOKENS = 4096  # Maximum tokens allowed in a single API call
 TOKENS_PER_SLIDE_ESTIMATE = 100  # Rough estimate of tokens used per slide
-
-# Initialize tokenizer
-tokenizer = Tokenizer()
 
 # Set OpenAI API key
 openai.api_key = st.secrets['OPENAI_KEY']
@@ -70,18 +67,17 @@ def generate_outline(topic, num_slides):
         engine="text-davinci-003",
         prompt=f"Generate {num_slides} slide titles for a presentation on the topic: '{topic}'.\n\n",
         temperature=0.5,
-        max_tokens=100,
+        max_tokens=10 * num_slides,  # Adjusted this to give the model more space to generate titles
         n=1
     )
     
     # Extract the text from the single completion choice
-    #generated_text = response.choices[0].text.strip()
-    generated_text = [item.text.strip() for item in response.choices]
-    
+    generated_text = response.choices[0].text.strip()
+
     # Split the generated text into individual slide titles
     # This assumes that the generated text contains slide titles separated by newlines
     outline = generated_text.split('\n')
-    
+
     # Make sure that the number of slide titles matches num_slides
     if len(outline) != num_slides:
         print(f"Warning: Expected {num_slides} slide titles but received {len(outline)}")
@@ -146,9 +142,6 @@ def get_download_link(file_path):
     b64 = base64.b64encode(data).decode()
     return f'<a href="data:application/octet-stream;base64,{b64}" download="{file_path}">Download file</a>'
 
-def calculate_tokens(text):
-    tokens = list(tokenizer.tokenize(text))
-    return len(tokens)
 
 def main():
     st.title('PowerPoint Presentation Creator')
@@ -159,19 +152,26 @@ def main():
     # Step 2: Allow the user to select n charts for the outline
     num_slides = st.sidebar.number_input('Number of slides', min_value=1)
 
-    # Calculate estimated tokens
+    # Before the 'Generate Outline' button press
+    if 'outline' not in st.session_state:
+        st.session_state['outline'] = []
+        st.session_state['approved'] = False
+
     estimated_tokens = num_slides * TOKENS_PER_SLIDE_ESTIMATE
-    st.sidebar.write(f'Estimated tokens to be used: {estimated_tokens}')
+    if estimated_tokens > MAX_TOKENS:
+        st.warning(f"Estimated token usage is {estimated_tokens}, which is more than the maximum allowed ({MAX_TOKENS}). Consider reducing the number of slides.")
+    else:
+        # Step 3: Generate the outline upon pressing Generate Outline
+        if st.sidebar.button('Generate Outline'):
+            try:
+                st.session_state['outline'] = generate_outline(topic, num_slides)
+            except Exception as e:
+                st.error(f"Failed to generate outline: {e}")
 
-    # Step 3: Generate the outline upon pressing Generate Outline
-    if st.sidebar.button('Generate Outline'):
-        outline = generate_outline(topic, num_slides)
-        st.session_state['outline'] = outline
-
-        # Step 4: Display the outline in the sidebar
-        st.sidebar.write('Generated Outline:')
-        for slide_title in outline:
-            st.sidebar.write(f'- {slide_title}')
+            # Step 4: Display the outline in the sidebar
+            st.sidebar.write('Generated Outline:')
+            for slide_title in st.session_state['outline']:
+                st.sidebar.write(f'- {slide_title}')
 
     # Step 5: Allow the user to approve the Outline
     if st.sidebar.button('Approve Outline'):
@@ -179,58 +179,35 @@ def main():
 
     # If the Outline is approved
     if 'approved' in st.session_state and st.session_state['approved']:
-        if st.sidebar.button('Approve Token Usage'):
-            slides_content = generate_content_as_per_token_usage()
+        # Step 6: Generate slide content for each slide title in the outline
+        slides_content = []
+        for slide_title in st.session_state['outline']:
+            st.write(f"Generating slide content for: {slide_title}")
+            slide_content = generate_slide_content(slide_title)
+            slides_content.append(slide_content)
+            # Display the slide content dictionary
+            st.write(f"Slide Content: {slide_content}")
 
-            # Step 8: Prompt the user to enter their presenter name, presentation title, and company name
-            st.sidebar.title('Presentation Details')
-            company_name = st.sidebar.text_input('Company name', 'Company')
-            presentation_name = st.sidebar.text_input('Presentation name', 'Presentation')
-            presenter = st.sidebar.text_input('Presenter', 'Presenter')
+        # Step 8: Prompt the user to enter their presenter name, presentation title, and company name
+        st.sidebar.title('Presentation Details')
+        company_name = st.sidebar.text_input('Company name', 'Company')
+        presentation_name = st.sidebar.text_input('Presentation name', 'Presentation')
+        presenter = st.sidebar.text_input('Presenter', 'Presenter')
 
-            # Check if all details are entered
-            if company_name and presentation_name and presenter:
-                # Step 9: Show the "Create Presentation" button
-                if st.sidebar.button('Create Presentation'):
-                    create_presentation(slides_content, company_name, presentation_name, presenter)
-                    st.success('Presentation created successfully!')
+        # Check if all details are entered
+        if company_name and presentation_name and presenter:
+            # Step 9: Show the "Create Presentation" button
+            if st.sidebar.button('Create Presentation'):
+                create_presentation(slides_content, company_name, presentation_name, presenter)
+                st.success('Presentation created successfully!')
 
-                    # Step 10: Allow the user to download the presentation with a link
-                    download_link = get_download_link("SlideDeck.pptx")
-                    st.markdown(download_link, unsafe_allow_html=True)
+                # Step 10: Allow the user to download the presentation with a link
+                download_link = get_download_link("SlideDeck.pptx")
+                st.markdown(download_link, unsafe_allow_html=True)
 
-def generate_content_as_per_token_usage():
-    slides_content = []
-
-    batch_slide_titles = []
-    tokens_in_batch = 0
-
-    for i, slide_title in enumerate(st.session_state['outline']):
-        tokens_for_slide = calculate_tokens(slide_title)
-
-        if tokens_in_batch + tokens_for_slide > MAX_TOKENS:
-            slide_content_batch = generate_slide_content(batch_slide_titles)
-            slides_content.extend(slide_content_batch)
-
-            batch_slide_titles = [slide_title]
-            tokens_in_batch = tokens_for_slide
-        else:
-            batch_slide_titles.append(slide_title)
-            tokens_in_batch += tokens_for_slide
-
-    # Generate content for the last batch
-    if batch_slide_titles:
-        slide_content_batch = generate_slide_content(batch_slide_titles)
-        slides_content.extend(slide_content_batch)
-
-    return slides_content
 
 if __name__ == "__main__":
     main()
-
-
-
-
 
 
 
