@@ -15,7 +15,7 @@ openai.api_key = st.secrets['OPENAI_KEY']
 def generate_slide_content(title, engine):
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt=f"Generate slide content for the title: '{title}'\n\nShort crisp title:",
+        prompt=f"Generate slide content for the title: '{title}'\n\nCreate a Short crisp title:",
         temperature=0.5,
         max_tokens=10,
         n=1
@@ -24,16 +24,16 @@ def generate_slide_content(title, engine):
 
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt=f"Generate slide content for the title: '{title}'\n\nCreate {n} poignant and useful bullets of 12-14 words each:\n1.",
+        prompt=f"Generate slide content for the title: '{title}'\n\nCreate Three poignant and useful bullets of 12-14 words each:\n1.",
         temperature=0.5,
         max_tokens=30,
-        n=3
+        n=1
     )
     bullets = [bullet.text.strip() for bullet in response.choices]
 
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt=f"Generate slide content for the title: '{title}'\n\nCreate {n} short takeaway message of 8 words or less:",
+        prompt=f"Generate slide content for the title: '{title}'\n\nCreate one short takeaway message of 8 words or less:",
         temperature=0.5,
         max_tokens=10,
         n=1
@@ -42,15 +42,14 @@ def generate_slide_content(title, engine):
 
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt=f"Generate slide content for the title: '{title}'\n\n Create {n} detailed talking points of 30-40 words each:\n1.",
+        prompt=f"Generate slide content for the title: '{title}'\n\n Create Five detailed talking points of 30-40 words each:\n1.",
         temperature=0.5,
         max_tokens=60,
-        n=5
+        n=1
     )
     talking_points = [point.text.strip() for point in response.choices]
 
     slide_content = {
-        "title": title,
         "crisp_title": crisp_title,
         "bullets": bullets,
         "takeaway_message": takeaway_message,
