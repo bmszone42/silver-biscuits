@@ -186,13 +186,21 @@ def main():
             presenter = st.sidebar.text_input('Presenter', 'Presenter')
 
             # Step 9: Show the "Create Presentation" button
-            if st.sidebar.button('Create Presentation'):
-                create_presentation(slides_content, company_name, presentation_name, presenter)
-                st.success('Presentation created successfully!')
+            if company_name and presentation_name and presenter:
+                if st.sidebar.button('Create Presentation'):
+                    create_presentation(slides_content, company_name, presentation_name, presenter)
+                    st.success('Presentation created successfully!')
+                    
+                    # Step 10: Allow the user to download the presentation with a link
+                    download_link = get_download_link("SlideDeck.pptx")
+                    st.markdown(download_link, unsafe_allow_html=True)
 
-                # Step 10: Allow the user to download the presentation with a link
-                download_link = get_download_link("SlideDeck.pptx")
-                st.markdown(download_link, unsafe_allow_html=True)
+            else:
+                st.sidebar.warning('Please enter all the presentation details.')
+
+                
+            if st.sidebar.button('Reset'):
+                st.session_state.clear()
 
 if __name__ == "__main__":
     main()
