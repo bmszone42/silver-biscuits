@@ -6,6 +6,7 @@ import os
 from pptx.util import Inches, Pt
 from pptx import Presentation
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
+import base64
 
 def create_presentation(slides_content, company_name, presentation_name, presenter):
     # Initialize a Presentation object
@@ -59,6 +60,12 @@ def create_presentation(slides_content, company_name, presentation_name, present
     # Save the presentation
     presentation.save("MitoSense for Space.pptx")
 
+def get_download_link(file_path):
+    with open(file_path, 'rb') as f:
+        data = f.read()
+    b64 = base64.b64encode(data).decode()
+    return f'<a href="data:application/octet-stream;base64,{b64}" download="{file_path}">Download file</a>'
+
 def main():
     st.title('PowerPoint Presentation Creator')
 
@@ -76,9 +83,14 @@ def main():
         create_presentation(slides_content, company_name, presentation_name, presenter)
 
         st.success('Presentation created successfully!')
+        
+        # Provide download link
+        download_link = get_download_link("MitoSense for Space.pptx")
+        st.markdown(download_link, unsafe_allow_html=True)
 
     except Exception as e:
         st.error(f'Error parsing dictionary: {e}')
 
 if __name__ == "__main__":
     main()
+
