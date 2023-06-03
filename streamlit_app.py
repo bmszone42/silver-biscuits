@@ -69,6 +69,12 @@ def get_download_link(file_path):
 def main():
     st.title('PowerPoint Presentation Creator')
 
+    # Add input fields in sidebar
+    st.sidebar.title('Presentation Details')
+    company_name = st.sidebar.text_input('Company name', 'Company')
+    presentation_name = st.sidebar.text_input('Presentation name', 'Presentation')
+    presenter = st.sidebar.text_input('Presenter', 'Presenter')
+
     st.write('Please paste your Python dictionary here.')
     user_input = st.text_area("Paste your dictionary here", "{}")
     
@@ -79,10 +85,6 @@ def main():
         try:
             # The content is evaluated as a Python dictionary
             slides_content = ast.literal_eval(user_input)
-
-            company_name = "MitoSense"
-            presentation_name = "Mitochondrial Frontiers: Exploring the Role of Mitochondria Organelle Transplantation in Spaceflight and Neurodegeneration"
-            presenter = "Brent Segal, PhD"
 
             create_presentation(slides_content, company_name, presentation_name, presenter)
 
