@@ -10,7 +10,7 @@ import base64
 import openai
 
 # Set OpenAI API key
-openai.api_key = st,secrets['OPENAIAPI_KEY']
+openai.api_key = st.secrets['OPENAIAPI_KEY']
 
 def generate_outline(topic, num_slides):
     response = openai.Completion.create(
@@ -23,6 +23,20 @@ def generate_outline(topic, num_slides):
     outline = response.choices[0].text.strip().split('\n')
     return outline
 
+def generate_presentation(slide_titles):
+    # In a real-world scenario, you might want to use the OpenAI API here to generate the content for each slide
+    presentation = {
+        "slides": [
+            {
+                "title": title,
+                "bulletPoints": ["Bullet point 1", "Bullet point 2", "Bullet point 3"],
+                "takeawayMessage": "Takeaway message",
+                "talkingPoints": ["Talking point 1", "Talking point 2", "Talking point 3", "Talking point 4", "Talking point 5"]
+            }
+            for title in slide_titles
+        ]
+    }
+    return presentation
 
 def create_presentation(slides_content, company_name, presentation_name, presenter):
     # Initialize a Presentation object
