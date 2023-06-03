@@ -169,10 +169,9 @@ def setup_app_title():
     }
     </style>
     """, unsafe_allow_html=True)
-
     st.markdown('<p class="big-font">🎨 SlideSage: Crafting <span style="color: teal;">Powerful</span> Presentations with <span style="color: pink;">AI</span> 🚀</p>', unsafe_allow_html=True)
 
- def setup_sidebar_style():
+def setup_sidebar_style():
     st.markdown("""
     <style>
     .reportview-container .main .block-container {
