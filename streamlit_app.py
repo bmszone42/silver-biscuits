@@ -1,38 +1,83 @@
-from collections import namedtuple
-import altair as alt
-import math
-import pandas as pd
+# app.py
+
 import streamlit as st
+import ast
+import os
+from pptx.util import Inches, Pt
+from pptx import Presentation
+from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 
-"""
-# Welcome to Streamlit!
+def create_presentation(slides_content, company_name, presentation_name, presenter):
+    # Initialize a Presentation object
+    presentation = Presentation()
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:
+    # Add title slide
+    slide_layout = presentation.slide_layouts[0]  # Slide layout 0 is a title slide
+    slide = presentation.slides.add_slide(slide_layout)
+    title = slide.shapes.title
+    title.text = presentation_name
+    subtitle = slide.placeholders[1]
+    subtitle.text = presenter
 
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
+    # Add other slides
+    for i, slide_content in enumerate(slides_content["slides"], start=2):
+        # Add a new slide with a title and content layout
+        slide_layout = presentation.slide_layouts[1]
+        slide = presentation.slides.add_slide(slide_layout)
 
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
+        # Set the title
+        title = slide.shapes.title
+        title.text = slide_content["title"]
 
+        # Add bullet points
+        content = slide.placeholders[1]
+        tf = content.text_frame
+        tf.text = slide_content["bulletPoints"][0]
+        for point in slide_content["bulletPoints"][1:]:
+            p = tf.add_paragraph()
+            p.text = point
 
-with st.echo(code_location='below'):
-    total_points = st.slider("Number of points in spiral", 1, 5000, 2000)
-    num_turns = st.slider("Number of turns in spiral", 1, 100, 9)
+        # Add takeaway message at the bottom left with larger font
+        left = Inches(1)
+        top = Inches(6) 
+        width = Inches(6)
+        height = Inches(2)
+        txBox = slide.shapes.add_textbox(left, top, width, height)
+        tf = txBox.text_frame
+        p = tf.add_paragraph()
+        p.text = slide_content["takeawayMessage"]
+        for paragraph in tf.paragraphs:
+            for run in paragraph.runs:
+                run.font.size = Pt(24)  # Larger font size
 
-    Point = namedtuple('Point', 'x y')
-    data = []
+        # Add notes to the slide
+        notes_slide = slide.notes_slide
+        notes_tf = notes_slide.notes_text_frame
+        for note in slide_content["talkingPoints"]:
+            notes_tf.add_paragraph().text = note
 
-    points_per_turn = total_points / num_turns
+    # Save the presentation
+    presentation.save("MitoSense for Space.pptx")
 
-    for curr_point_num in range(total_points):
-        curr_turn, i = divmod(curr_point_num, points_per_turn)
-        angle = (curr_turn + 1) * 2 * math.pi * i / points_per_turn
-        radius = curr_point_num / total_points
-        x = radius * math.cos(angle)
-        y = radius * math.sin(angle)
-        data.append(Point(x, y))
+def main():
+    st.title('PowerPoint Presentation Creator')
 
-    st.altair_chart(alt.Chart(pd.DataFrame(data), height=500, width=500)
-        .mark_circle(color='#0068c9', opacity=0.5)
-        .encode(x='x:Q', y='y:Q'))
+    st.write('Please upload your Python dictionary file.')
+    uploaded_file = st.file_uploader("Choose a file", type=["txt"])
+
+    if uploaded_file is not None:
+        # The file is opened and read into a variable
+        file_content = uploaded_file.getvalue().decode("utf-8")
+        # The content is evaluated as a Python dictionary
+        slides_content = ast.literal_eval(file_content)
+
+        company_name = "MitoSense"
+        presentation_name = "Mitochondrial Frontiers: Exploring the Role of Mitochondria Organelle Transplantation in Spaceflight and Neurodegeneration"
+        presenter = "Brent Segal, PhD"
+
+        create_presentation(slides_content, company_name, presentation_name, presenter)
+
+        st.success('Presentation created successfully!')
+
+if __name__ == "__main__":
+    main()
