@@ -125,7 +125,6 @@ def get_download_link(file_path):
         data = f.read()
     b64 = base64.b64encode(data).decode()
     return f'<a href="data:application/octet-stream;base64,{b64}" download="{file_path}">Download file</a>'
-
 def main():
     st.title('PowerPoint Presentation Creator')
 
@@ -139,45 +138,48 @@ def main():
     if st.sidebar.button('Generate Outline'):
         outline = generate_outline(topic, num_slides)
 
-        # Step 4: Show the Outline to the User
+        # Display the outline
         st.write('Generated Outline:')
         for slide_title in outline:
             st.write(f'- {slide_title}')
 
-        # Step 5: Allow the user to approve the Outline or generate a new outline
-        approved = st.button('Approve Outline')
+        # Step 4: Allow the user to approve the Outline or generate a new outline
+        approved = st.checkbox('Approve Outline')
         if not approved:
             st.write("Outline not approved. Please generate a new outline.")
-            return
+            if st.button('Generate New Outline'):
+                # Clear the previous outline
+                outline = []
+        else:
+            # Step 5: If the Outline is approved, generate a python dictionary with content for the presentation
+            slides_content = []
+            for slide_title in outline:
+                st.write(f"Generating slide content for: {slide_title}")
+                slide_content = generate_slide_content(slide_title)
+                slides_content.append(slide_content)
+                # Display the slide content dictionary
+                st.write(f"Slide Content: {slide_content}")
 
-        # Step 6: If the Outline is approved, generate a python dictionary with content for the presentation
-        slides_content = []
-        for slide_title in outline:
-            st.write(f"Generating slide content for: {slide_title}")
-            slide_content = generate_slide_content(slide_title)
-            slides_content.append(slide_content)
-            # Display the slide content dictionary
-            st.write(f"Slide Content: {slide_content}")
+            # Step 6: Prompt the user to enter their presenter name, presentation title, and company name
+            st.sidebar.title('Presentation Details')
+            company_name = st.sidebar.text_input('Company name', 'Company')
+            presentation_name = st.sidebar.text_input('Presentation name', 'Presentation')
+            presenter = st.sidebar.text_input('Presenter', 'Presenter')
 
-        # Step 7: Prompt the user to enter their presenter name, presentation title, and company name
-        st.sidebar.title('Presentation Details')
-        company_name = st.sidebar.text_input('Company name', 'Company')
-        presentation_name = st.sidebar.text_input('Presentation name', 'Presentation')
-        presenter = st.sidebar.text_input('Presenter', 'Presenter')
+            # Step 7: If the user approves the outline, create a presentation in pptx format
+            if st.button('Create Presentation'):
+                create_presentation(slides_content, company_name, presentation_name, presenter)
+                st.success('Presentation created successfully!')
 
-        # Step 8: If the user approves the outline, create a presentation in pptx format
-        if st.button('Create Presentation'):
-            create_presentation(slides_content, company_name, presentation_name, presenter)
-            st.success('Presentation created successfully!')
+                # Step 8: Allow the user to download the presentation with a link
+                download_link = get_download_link("SlideDeck.pptx")
+                st.markdown(download_link, unsafe_allow_html=True)
 
-            # Step 9: Allow the user to download the presentation with a link
-            download_link = get_download_link("SlideDeck.pptx")
-            st.markdown(download_link, unsafe_allow_html=True)
-
-            return  # Exit the function to prevent further execution
+                return  # Exit the function to prevent further execution
 
     # Additional code logic here if the outline is not approved or no action is taken
     # ...
 
 if __name__ == "__main__":
     main()
+
