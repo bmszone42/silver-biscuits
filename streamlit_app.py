@@ -154,6 +154,8 @@ def main():
         for slide_title in outline:
             slide_content = generate_slide_content(slide_title)
             slides_content.append(slide_content)
+            # Display the slide content dictionary
+            st.code(slide_content, language='python')
 
         # Step 7: Prompt the user to enter their presenter name, presentation title, and company name
         st.sidebar.title('Presentation Details')
@@ -177,3 +179,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
