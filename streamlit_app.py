@@ -68,7 +68,8 @@ def generate_outline(topic, num_slides):
     )
     
     # Extract the text from the single completion choice
-    generated_text = response.choices[0].text.strip()
+    #generated_text = response.choices[0].text.strip()
+    generated_text = [item.text.strip() for item in response.choices]
     
     # Split the generated text into individual slide titles
     # This assumes that the generated text contains slide titles separated by newlines
