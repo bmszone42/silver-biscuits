@@ -9,6 +9,9 @@ from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 import base64
 import openai
 
+# Set OpenAI API key
+openai.api_key = st,secrets['OPENAIAPI_KEY']
+
 def generate_outline(topic, num_slides):
     response = openai.Completion.create(
       engine="text-davinci-003",
