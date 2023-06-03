@@ -146,7 +146,8 @@ def get_download_link(file_path):
 def reset_all():
     for key in list(st.session_state.keys()):
         del st.session_state[key]
-        
+    st.session_state.confirm_details = False  # Reset the checkbox value
+     
 def format_slide_content(slide_content):
     formatted_content = ""
     for key, value in slide_content.items():
@@ -208,7 +209,10 @@ def main():
     presenter = st.sidebar.text_input('Presenter', 'Presenter')
 
     # Step 8: Confirm entered details
-    confirm_details = st.sidebar.checkbox('Confirm details')
+    if 'confirm_details' not in st.session_state:
+        st.session_state.confirm_details = False
+    st.session_state.confirm_details = st.sidebar.checkbox('Confirm details', value=st.session_state.confirm_details)
+
 
     # If the Outline is approved and details are confirmed
     if 'approved' in st.session_state and st.session_state['approved'] and confirm_details:
