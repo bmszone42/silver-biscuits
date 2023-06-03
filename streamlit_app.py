@@ -2,39 +2,84 @@
 
 import streamlit as st
 import ast
-import os
 from pptx.util import Inches, Pt
 from pptx import Presentation
-from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 import base64
 import openai
 
 # Set OpenAI API key
 openai.api_key = st.secrets['OPENAI_KEY']
 
-def generate_outline(topic, num_slides):
+def generate_slide_content(title):
     response = openai.Completion.create(
-      engine="text-davinci-003",
-      prompt=f"Create an outline for a presentation on the topic of '{topic}' with {num_slides} slides.",
-      temperature=0.5,
-      max_tokens=60
+        engine="text-davinci-003",
+        prompt=f"Generate slide content for the title: '{title}'\n\nShort crisp title:",
+        temperature=0.5,
+        max_tokens=10,
+        n=1
     )
+    crisp_title = response.choices[0].text.strip()
 
-    outline = response.choices[0].text.strip().split('\n')
+    response = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=f"Generate slide content for the title: '{title}'\n\nThree poignant and useful bullets:\n1.",
+        temperature=0.5,
+        max_tokens=30,
+        n=3
+    )
+    bullets = [bullet.strip() for bullet in response.choices]
+
+    response = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=f"Generate slide content for the title: '{title}'\n\nShort takeaway message (8 words or less):",
+        temperature=0.5,
+        max_tokens=10,
+        n=1
+    )
+    takeaway_message = response.choices[0].text.strip()
+
+    response = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=f"Generate slide content for the title: '{title}'\n\nFive detailed talking points (50 words each):\n1.",
+        temperature=0.5,
+        max_tokens=60,
+        n=5
+    )
+    talking_points = [point.strip() for point in response.choices]
+
+    slide_content = {
+        "title": title,
+        "crisp_title": crisp_title,
+        "bullets": bullets,
+        "takeaway_message": takeaway_message,
+        "talking_points": talking_points
+    }
+
+    return slide_content
+
+def generate_outline(topic, num_slides):
+    outline = []
+    for i in range(num_slides):
+        response = openai.Completion.create(
+            engine="text-davinci-003",
+            prompt=f"Generate outline for slide {i+1} on the topic: '{topic}'\n\nSlide title:",
+            temperature=0.5,
+            max_tokens=10,
+            n=1
+        )
+        slide_title = response.choices[0].text.strip()
+        outline.append(slide_title)
+
     return outline
 
-def generate_presentation(slide_titles):
-    # In a real-world scenario, you might want to use the OpenAI API here to generate the content for each slide
+def generate_presentation(outline):
+    slides_content = []
+    for title in outline:
+        slide_content = generate_slide_content(title)
+        slides_content.append(slide_content)
+
     presentation = {
-        "slides": [
-            {
-                "title": title,
-                "bulletPoints": ["Bullet point 1", "Bullet point 2", "Bullet point 3"],
-                "takeawayMessage": "Takeaway message",
-                "talkingPoints": ["Talking point 1", "Talking point 2", "Talking point 3", "Talking point 4", "Talking point 5"]
-            }
-            for title in slide_titles
-        ]
+        "slides": slides_content
     }
     return presentation
 
@@ -51,32 +96,31 @@ def create_presentation(slides_content, company_name, presentation_name, present
     subtitle.text = presenter
 
     # Add other slides
-    for i, slide_content in enumerate(slides_content["slides"], start=2):
+    for slide_content in slides_content:
         # Add a new slide with a title and content layout
         slide_layout = presentation.slide_layouts[1]
         slide = presentation.slides.add_slide(slide_layout)
 
         # Set the title
         title = slide.shapes.title
-        title.text = slide_content["title"]
+        title.text = slide_content["crisp_title"]
 
         # Add bullet points
         content = slide.placeholders[1]
         tf = content.text_frame
-        tf.text = slide_content["bulletPoints"][0]
-        for point in slide_content["bulletPoints"][1:]:
+        for bullet in slide_content["bullets"]:
             p = tf.add_paragraph()
-            p.text = point
+            p.text = bullet
 
         # Add takeaway message at the bottom left with larger font
         left = Inches(1)
-        top = Inches(6) 
+        top = Inches(6)
         width = Inches(6)
         height = Inches(2)
         txBox = slide.shapes.add_textbox(left, top, width, height)
         tf = txBox.text_frame
         p = tf.add_paragraph()
-        p.text = slide_content["takeawayMessage"]
+        p.text = slide_content["takeaway_message"]
         for paragraph in tf.paragraphs:
             for run in paragraph.runs:
                 run.font.size = Pt(24)  # Larger font size
@@ -84,11 +128,11 @@ def create_presentation(slides_content, company_name, presentation_name, present
         # Add notes to the slide
         notes_slide = slide.notes_slide
         notes_tf = notes_slide.notes_text_frame
-        for note in slide_content["talkingPoints"]:
-            notes_tf.add_paragraph().text = note
+        for talking_point in slide_content["talking_points"]:
+            notes_tf.add_paragraph().text = talking_point
 
     # Save the presentation
-    presentation.save("MitoSense for Space.pptx")
+    presentation.save("SlideDeck.pptx")
 
 def get_download_link(file_path):
     with open(file_path, 'rb') as f:
@@ -98,37 +142,32 @@ def get_download_link(file_path):
 
 def main():
     st.title('PowerPoint Presentation Creator')
-    
+
     # Ask for the topic and number of slides
-topic = st.sidebar.text_input('Topic')
-num_slides = st.sidebar.number_input('Number of slides', min_value=1)
+    topic = st.sidebar.text_input('Topic')
+    num_slides = st.sidebar.number_input('Number of slides', min_value=1)
 
-# When the user clicks the "Generate Outline" button, generate the outline
-if st.sidebar.button('Generate Outline'):
-    outline = generate_outline(topic, num_slides)
-    
-    # Store the outline in a session state variable so it persists across runs
-    st.session_state['outline'] = outline
+    # When the user clicks the "Generate Outline" button, generate the outline
+    if st.sidebar.button('Generate Outline'):
+        outline = generate_outline(topic, num_slides)
 
-    # Display checkboxes for each item in the outline
-    st.session_state['include_slide'] = []
-    for i, slide_title in enumerate(outline):
-        include_slide = st.checkbox(f'Include "{slide_title}" in the presentation?', key=f'include_slide_{i}')
-        st.session_state['include_slide'].append(include_slide)
-        
-        # Allow the user to edit the title
-        edited_title = st.text_input('Edit the slide title', slide_title, key=f'edited_title_{i}')
-        if edited_title != slide_title:
-            outline[i] = edited_title
-            
+        # Store the outline in a session state variable so it persists across runs
+        st.session_state['outline'] = outline
+
+        # Display checkboxes for each item in the outline
+        st.session_state['include_slide'] = []
+        for i, slide_title in enumerate(outline):
+            include_slide = st.checkbox(f'Include "{slide_title}" in the presentation?', key=f'include_slide_{i}')
+            st.session_state['include_slide'].append(include_slide)
+
     # When the user clicks the "Generate Presentation" button, generate the presentation
     if st.button('Generate Presentation'):
         # Use only the titles that the user checked
-        slide_titles = [title for include, title in zip(st.session_state['include_slide'], outline) if include]
-        
+        slide_titles = [title for include, title in zip(st.session_state['include_slide'], st.session_state['outline']) if include]
+
         # Generate the presentation dictionary
         presentation = generate_presentation(slide_titles)
-        
+
         # Display the presentation dictionary
         st.code(presentation, language='json')
 
@@ -138,28 +177,37 @@ if st.sidebar.button('Generate Outline'):
     presentation_name = st.sidebar.text_input('Presentation name', 'Presentation')
     presenter = st.sidebar.text_input('Presenter', 'Presenter')
 
-    st.write('Please paste your Python dictionary here.')
-    user_input = st.text_area("Paste your dictionary here", "{}")
-    
-    # Add the Make Presentation button
-    button_clicked = st.button('Make Presentation')
+    # Add the Make Presentation button if required fields are filled
+    if company_name and presentation_name and presenter:
+        button_clicked = st.button('Make Presentation')
 
-    if button_clicked:
-        try:
-            # The content is evaluated as a Python dictionary
-            slides_content = ast.literal_eval(user_input)
+        if button_clicked:
+            try:
+                # Create slides content based on the generated presentation dictionary
+                slides_content = []
+                for slide_title in presentation['slides']:
+                    slide_content = generate_slide_content(slide_title)
+                    slides_content.append(slide_content)
 
-            create_presentation(slides_content, company_name, presentation_name, presenter)
+                # Display the slides content
+                st.code(slides_content, language='json')
 
-            st.success('Presentation created successfully!')
+                # Ask for user approval
+                approved = st.checkbox('I approve the slide content and want to create the presentation.')
 
-            # Provide download link
-            download_link = get_download_link("MitoSense for Space.pptx")
-            st.markdown(download_link, unsafe_allow_html=True)
+                if approved:
+                    create_presentation(slides_content, company_name, presentation_name, presenter)
 
-        except Exception as e:
-            st.error(f'Error parsing dictionary: {e}')
+                    st.success('Presentation created successfully!')
+
+                    # Provide download link
+                    download_link = get_download_link("SlideDeck.pptx")
+                    st.markdown(download_link, unsafe_allow_html=True)
+
+            except Exception as e:
+                st.error(f'Error generating presentation: {e}')
+    else:
+        st.warning('Please fill in all required fields.')
 
 if __name__ == "__main__":
     main()
-
