@@ -28,7 +28,7 @@ def generate_slide_content(title):
         max_tokens=30,
         n=3
     )
-    bullets = [bullet.strip() for bullet in response.choices]
+    bullets = [bullet.text.strip() for bullet in response.choices]
 
     response = openai.Completion.create(
         engine="text-davinci-003",
@@ -46,7 +46,7 @@ def generate_slide_content(title):
         max_tokens=60,
         n=5
     )
-    talking_points = [point.strip() for point in response.choices]
+    talking_points = [point.text.strip() for point in response.choices]
 
     slide_content = {
         "title": title,
