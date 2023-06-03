@@ -6,6 +6,7 @@ from pptx.util import Inches, Pt
 from pptx import Presentation
 import base64
 import openai
+from collections.abc import Iterable
 
 # Set OpenAI API key
 openai.api_key = st.secrets['OPENAI_KEY']
@@ -136,13 +137,17 @@ def main():
     num_slides = st.sidebar.number_input('Number of slides', min_value=1)
 
     # Step 3: Generate the outline upon pressing Generate Outline
-    if st.sidebar.button('Generate Outline'):
-        outline = generate_outline(topic, num_slides)
+if st.sidebar.button('Generate Outline'):
+    outline = generate_outline(topic, num_slides)
+    
+    if outline is None or not isinstance(outline, Iterable):
+        st.sidebar.write('Failed to generate an outline. Please check your input.')
+        return  # stop further execution
 
-        # Step 4: Display the outline in the sidebar
-        st.sidebar.write('Generated Outline:')
-        for slide_title in outline:
-            st.sidebar.write(f'- {slide_title}')
+    # Step 4: Display the outline in the sidebar
+    st.sidebar.write('Generated Outline:')
+    for slide_title in outline:
+        st.sidebar.write(f'- {slide_title}')
 
     # Step 5: Allow the user to approve the Outline
     approved = st.sidebar.checkbox('Approve Outline')
