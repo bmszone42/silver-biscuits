@@ -86,7 +86,6 @@ def generate_outline(topic, num_slides, engine):
 
     return outline
 
-
 def create_presentation(slides_content, company_name, presentation_name, presenter):
     # Initialize a Presentation object
     presentation = Presentation()
@@ -196,7 +195,7 @@ def main():
             # Step 5: Display the outline in the sidebar
             st.sidebar.write('Generated Outline:')
             for slide_title in st.session_state['outline']:
-                st.sidebar.write(f'- {slide_title}')
+                st.sidebar.write(f'{slide_title}')
 
     # Step 6: Allow the user to approve the Outline
     if st.sidebar.button('Approve Outline'):
