@@ -144,6 +144,20 @@ def get_download_link(file_path):
     b64 = base64.b64encode(data).decode()
     return f'<a href="data:application/octet-stream;base64,{b64}" download="{file_path}">Download file</a>'
 
+def reset_all():
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+        
+def format_slide_content(slide_content):
+    formatted_content = ""
+    for key, value in slide_content.items():
+        formatted_content += f"{key.capitalize()}:\n"
+        if isinstance(value, Iterable) and not isinstance(value, str):
+            for i, item in enumerate(value, start=1):
+                formatted_content += f"  {i}. {item}\n"
+        else:
+            formatted_content += f"  {value}\n"
+    return formatted_content
 
 def main():
     st.title('PowerPoint Presentation Creator')
@@ -205,8 +219,9 @@ def main():
             st.write(f"Generating slide content for: {slide_title}")
             slide_content = generate_slide_content(slide_title, engine)
             slides_content.append(slide_content)
-            # Display the slide content dictionary
-            st.write(f"Slide Content: {slide_content}")
+            
+            # Display the slide content in a formatted manner
+            st.write(f"Slide Content:\n{format_slide_content(slide_content)}")
 
         # Step 10: Show the "Create Presentation" button
         if st.sidebar.button('Create Presentation'):
@@ -217,7 +232,10 @@ def main():
             download_link = get_download_link("SlideDeck.pptx")
             st.markdown(download_link, unsafe_allow_html=True)
 
-
+     # Reset Button
+    if st.sidebar.button('Reset'):
+        reset_all()
+      
 if __name__ == "__main__":
     main()
 
