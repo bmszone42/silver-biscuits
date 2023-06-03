@@ -10,7 +10,7 @@ import base64
 import openai
 
 # Set OpenAI API key
-openai.api_key = st.secrets['OPENAIAPI_KEY']
+openai.api_key = st.secrets['OPENAI_KEY']
 
 def generate_outline(topic, num_slides):
     response = openai.Completion.create(
