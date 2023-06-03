@@ -15,7 +15,7 @@ openai.api_key = st.secrets['OPENAI_KEY']
 def generate_slide_content(title, engine):
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt=f"Generate slide content for the title: '{title}'\n\nCreate a Short crisp title:",
+        prompt=f"Generate content for the title: '{title}'\n\n Create a Short crisp title:",
         temperature=0.5,
         max_tokens=10,
         n=1
@@ -24,7 +24,7 @@ def generate_slide_content(title, engine):
 
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt=f"Generate slide content for the title: '{title}'\n\nCreate Three poignant and useful bullets of 12-14 words each:\n1.",
+        prompt=f"Generate content for the title: '{title}'\n\n Create Three poignant and useful bullets of 10-14 words each:\n1.",
         temperature=0.5,
         max_tokens=50,
         n=1
@@ -33,7 +33,7 @@ def generate_slide_content(title, engine):
 
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt=f"Generate slide content for the title: '{title}'\n\nCreate one short takeaway message of 8 words or less:",
+        prompt=f"Generate content for the title: '{title}'\n\n Create one short key takeaway message of 8 words or less:\n1.",
         temperature=0.5,
         max_tokens=10,
         n=1
