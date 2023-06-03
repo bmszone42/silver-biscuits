@@ -73,7 +73,7 @@ def main():
 
         company_name = "MitoSense"
         presentation_name = "Mitochondrial Frontiers: Exploring the Role of Mitochondria Organelle Transplantation in Spaceflight and Neurodegeneration"
-        presenter = "Brent Segal, PhD"
+        presenter = "Brent Segal"
 
         create_presentation(slides_content, company_name, presentation_name, presenter)
 
