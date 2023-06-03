@@ -159,11 +159,41 @@ def format_slide_content(slide_content):
             formatted_content += f"  {value}\n"
     return formatted_content
 
-def main():
-    st.title('PowerPoint Presentation Creator')
+def setup_app_title():
+    st.markdown("""
+    <style>
+    .big-font {
+        font-size:50px !important;
+        color: purple;
+        font-weight: bold;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
+    st.markdown('<p class="big-font">🎨 SlideSage: Crafting <span style="color: teal;">Powerful</span> Presentations with <span style="color: pink;">AI</span> 🚀</p>', unsafe_allow_html=True)
+
+    def setup_sidebar_style():
+    st.markdown("""
+    <style>
+    .reportview-container .main .block-container {
+        margin-left: 10px;
+        margin-right: 10px;
+        padding-top: 10px;
+        padding-right: 10px;
+        padding-left: 10px;
+        padding-bottom: 10px;
+    }
+    .sidebar .sidebar-content {
+        background-color: #f0f0f5;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+def main():
+    setup_app_title()
+    setup_sidebar_style()
     # Step 1: Allow user to enter a topic
-    topic = st.sidebar.text_input('Topic')
+    topic = st.sidebar.text_input('Topic for the PowerPoint Deck')
 
     # Step 2: Allow the user to select n charts for the outline
     num_slides = st.sidebar.number_input('Number of slides', min_value=1)
@@ -213,9 +243,9 @@ def main():
         st.session_state.confirm_details = False
     st.session_state.confirm_details = st.sidebar.checkbox('Confirm details', value=st.session_state.confirm_details)
 
+        # If the Outline is approved and details are confirmed
+    if 'approved' in st.session_state and st.session_state['approved'] and st.session_state.confirm_details:
 
-    # If the Outline is approved and details are confirmed
-    if 'approved' in st.session_state and st.session_state['approved'] and confirm_details:
         # Step 9: Generate slide content for each slide title in the outline
         slides_content = []
         for slide_title in st.session_state['outline']:
