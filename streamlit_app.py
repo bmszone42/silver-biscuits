@@ -15,16 +15,16 @@ openai.api_key = st.secrets['OPENAI_KEY']
 def generate_slide_content(title, engine):
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt=f"Generate content for the title: '{title}'\n\n Create a Short crisp title:",
+        prompt=f"Generate content for the title: '{title}'\n\n Create one Short crisp title:\n1.",
         temperature=0.5,
         max_tokens=10,
         n=1
     )
-    crisp_title = response.choices[0].text.strip()
+    crisp_title = [crisp.text.strip() for crisp in response.choices]
 
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt=f"Generate content for the title: '{title}'\n\n Create Three poignant and useful bullets of 10-14 words each:\n1.",
+        prompt=f"Generate content for the title: '{title}'\n\n Create Three useful bullets of 10-14 words each:\n1.",
         temperature=0.5,
         max_tokens=50,
         n=1
@@ -38,7 +38,7 @@ def generate_slide_content(title, engine):
         max_tokens=10,
         n=1
     )
-    takeaway_message = response.choices[0].text.strip()
+    takeaway_message = [takeaway.text.strip() for takeaway in response.choices]
 
     response = openai.Completion.create(
         engine="text-davinci-003",
@@ -58,10 +58,10 @@ def generate_slide_content(title, engine):
 
     return slide_content
 
-def generate_outline(topic, num_slides, engine):
+def generate_outline(presentation_topic, num_slides, engine):
     response = openai.Completion.create(
         engine="text-davinci-003",
-        prompt=f"Generate {num_slides} slide titles for a presentation on the topic: '{topic}'.\n\n",
+        prompt=f"Generate {num_slides} slide titles for a presentation on the topic: '{presentation_topic}'.\n\n",
         temperature=0.5,
         max_tokens=20 * num_slides,  # Adjusted this to give the model more space to generate titles
         n=1
@@ -189,7 +189,7 @@ def main():
     setup_app_title()
     setup_sidebar_style()
     # Step 1: Allow user to enter a topic
-    topic = st.sidebar.text_input('Topic for the PowerPoint Deck')
+    powerpoint_topic = st.sidebar.text_input('Topic for the PowerPoint Deck')
 
     # Step 2: Allow the user to select n charts for the outline
     num_slides = st.sidebar.number_input('Number of slides', min_value=1)
@@ -215,7 +215,7 @@ def main():
         # Step 4: Generate the outline upon pressing Generate Outline
         if st.sidebar.button('Generate Outline'):
             try:
-                st.session_state['outline'] = generate_outline(topic, num_slides, engine)
+                st.session_state['outline'] = generate_outline(presentation_topic, num_slides, engine)
             except Exception as e:
                 st.error(f"Failed to generate outline: {e}")
 
