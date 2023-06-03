@@ -14,7 +14,7 @@ TOKENS_PER_SLIDE_ESTIMATE = 100  # Rough estimate of tokens used per slide
 # Set OpenAI API key
 openai.api_key = st.secrets['OPENAI_KEY']
 
-def generate_slide_content(title):
+def generate_slide_content(title, engine):
     response = openai.Completion.create(
         engine="text-davinci-003",
         prompt=f"Generate slide content for the title: '{title}'\n\nShort crisp title:",
@@ -61,7 +61,7 @@ def generate_slide_content(title):
 
     return slide_content
 
-def generate_outline(topic, num_slides):
+def generate_outline(topic, num_slides, engine):
     response = openai.Completion.create(
         engine="text-davinci-003",
         prompt=f"Generate {num_slides} slide titles for a presentation on the topic: '{topic}'.\n\n",
@@ -124,7 +124,7 @@ def create_presentation(slides_content, company_name, presentation_name, present
         p.text = slide_content["takeaway_message"]
         for paragraph in tf.paragraphs:
             for run in paragraph.runs:
-                run.font.size = Pt(24)  # Larger font size
+                run.font.size = Pt(20)  # Larger font size
 
         # Add notes to the slide
         notes_slide = slide.notes_slide
@@ -151,58 +151,68 @@ def main():
     # Step 2: Allow the user to select n charts for the outline
     num_slides = st.sidebar.number_input('Number of slides', min_value=1)
 
+    # Step 2.1: Allow user to select engine
+    engine = st.sidebar.selectbox('Select model', ['text-davinci-003', 'gpt-3.5-turbo'])
+
+    # Step 3: Show estimated tokens and cost
+    estimated_tokens = num_slides * TOKENS_PER_SLIDE_ESTIMATE
+    st.sidebar.write(f"Estimated token usage: {estimated_tokens}")
+    cost_per_1k_tokens = 0.002 if engine == 'gpt-3.5-turbo' else 0.02  # Adjust cost based on engine
+    estimated_cost = estimated_tokens / 1000 * cost_per_1k_tokens
+    st.sidebar.write(f"Estimated cost: ${estimated_cost}")
+
     # Before the 'Generate Outline' button press
     if 'outline' not in st.session_state:
         st.session_state['outline'] = []
         st.session_state['approved'] = False
 
-    estimated_tokens = num_slides * TOKENS_PER_SLIDE_ESTIMATE
     if estimated_tokens > MAX_TOKENS:
         st.warning(f"Estimated token usage is {estimated_tokens}, which is more than the maximum allowed ({MAX_TOKENS}). Consider reducing the number of slides.")
     else:
-        # Step 3: Generate the outline upon pressing Generate Outline
+        # Step 4: Generate the outline upon pressing Generate Outline
         if st.sidebar.button('Generate Outline'):
             try:
-                st.session_state['outline'] = generate_outline(topic, num_slides)
+                st.session_state['outline'] = generate_outline(topic, num_slides, engine)
             except Exception as e:
                 st.error(f"Failed to generate outline: {e}")
 
-            # Step 4: Display the outline in the sidebar
+            # Step 5: Display the outline in the sidebar
             st.sidebar.write('Generated Outline:')
             for slide_title in st.session_state['outline']:
                 st.sidebar.write(f'- {slide_title}')
 
-    # Step 5: Allow the user to approve the Outline
+    # Step 6: Allow the user to approve the Outline
     if st.sidebar.button('Approve Outline'):
         st.session_state['approved'] = True
 
-    # If the Outline is approved
-    if 'approved' in st.session_state and st.session_state['approved']:
-        # Step 6: Generate slide content for each slide title in the outline
+    # Step 7: Prompt the user to enter their presenter name, presentation title, and company name
+    st.sidebar.title('Presentation Details')
+    company_name = st.sidebar.text_input('Company name', 'Company')
+    presentation_name = st.sidebar.text_input('Presentation name', 'Presentation')
+    presenter = st.sidebar.text_input('Presenter', 'Presenter')
+
+    # Step 8: Confirm entered details
+    confirm_details = st.sidebar.checkbox('Confirm details')
+
+    # If the Outline is approved and details are confirmed
+    if 'approved' in st.session_state and st.session_state['approved'] and confirm_details:
+        # Step 9: Generate slide content for each slide title in the outline
         slides_content = []
         for slide_title in st.session_state['outline']:
             st.write(f"Generating slide content for: {slide_title}")
-            slide_content = generate_slide_content(slide_title)
+            slide_content = generate_slide_content(slide_title, engine)
             slides_content.append(slide_content)
             # Display the slide content dictionary
             st.write(f"Slide Content: {slide_content}")
 
-        # Step 8: Prompt the user to enter their presenter name, presentation title, and company name
-        st.sidebar.title('Presentation Details')
-        company_name = st.sidebar.text_input('Company name', 'Company')
-        presentation_name = st.sidebar.text_input('Presentation name', 'Presentation')
-        presenter = st.sidebar.text_input('Presenter', 'Presenter')
+        # Step 10: Show the "Create Presentation" button
+        if st.sidebar.button('Create Presentation'):
+            create_presentation(slides_content, company_name, presentation_name, presenter)
+            st.success('Presentation created successfully!')
 
-        # Check if all details are entered
-        if company_name and presentation_name and presenter:
-            # Step 9: Show the "Create Presentation" button
-            if st.sidebar.button('Create Presentation'):
-                create_presentation(slides_content, company_name, presentation_name, presenter)
-                st.success('Presentation created successfully!')
-
-                # Step 10: Allow the user to download the presentation with a link
-                download_link = get_download_link("SlideDeck.pptx")
-                st.markdown(download_link, unsafe_allow_html=True)
+            # Step 11: Allow the user to download the presentation with a link
+            download_link = get_download_link("SlideDeck.pptx")
+            st.markdown(download_link, unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
