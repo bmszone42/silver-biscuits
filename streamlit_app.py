@@ -17,10 +17,11 @@ def generate_slide_content(title, engine):
         engine="text-davinci-003",
         prompt=f"Generate content for the title: '{title}'\n\n Create one Short crisp title:\n1.",
         temperature=0.5,
-        max_tokens=10,
+        max_tokens=20,
         n=1
     )
-    crisp_title = [crisp.text.strip() for crisp in response.choices]
+    #crisp_title = [crisp.text.strip() for crisp in response.choices]
+    crisp_title = response.choices[0].text.strip()
 
     response = openai.Completion.create(
         engine="text-davinci-003",
@@ -35,10 +36,11 @@ def generate_slide_content(title, engine):
         engine="text-davinci-003",
         prompt=f"Generate content for the title: '{title}'\n\n Create one short key takeaway message of 8 words or less:\n1.",
         temperature=0.5,
-        max_tokens=10,
+        max_tokens=20,
         n=1
     )
-    takeaway_message = [takeaway.text.strip() for takeaway in response.choices]
+    #takeaway_message = [takeaway.text.strip() for takeaway in response.choices]
+    takeaway_message = response.choices[0].text.strip()
 
     response = openai.Completion.create(
         engine="text-davinci-003",
@@ -132,7 +134,7 @@ def create_presentation(slides_content, company_name, presentation_name, present
             notes_tf.add_paragraph().text = talking_point
 
     # Save the presentation
-    presentation.save("SlideDeck.pptx")
+    #presentation.save("SlideDeck.pptx")
 
 def get_download_link(file_path):
     with open(file_path, 'rb') as f:
@@ -252,14 +254,14 @@ def main():
             # Display the slide content in a formatted manner
             st.write(f"Slide Content:\n{format_slide_content(slide_content)}")
 
-        # Step 10: Show the "Create Presentation" button
-        if st.sidebar.button('Create Presentation'):
-            create_presentation(slides_content, company_name, presentation_name, presenter)
-            st.success('Presentation created successfully!')
+            # Step 10: Show the "Create Presentation" button
+            if st.sidebar.button('Create Presentation'):
+                create_presentation(slides_content, company_name, presentation_name, presenter)
+                st.success('Presentation created successfully!')
 
-            # Step 11: Allow the user to download the presentation with a link
-            download_link = get_download_link("SlideDeck.pptx")
-            st.markdown(download_link, unsafe_allow_html=True)
+                # Step 11: Allow the user to download the presentation with a link
+                download_link = get_download_link("SlideDeck.pptx")
+                st.markdown(download_link, unsafe_allow_html=True)
 
      # Reset Button
     if st.sidebar.button('Reset'):
