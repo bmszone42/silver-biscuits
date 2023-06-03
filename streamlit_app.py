@@ -7,7 +7,6 @@ from pptx import Presentation
 import base64
 import openai
 from collections.abc import Iterable
-from tiktoken import TikToken
 
 MAX_TOKENS = 4096  # Maximum tokens allowed in a single API call
 TOKENS_PER_SLIDE_ESTIMATE = 100  # Rough estimate of tokens used per slide
