@@ -66,9 +66,20 @@ def generate_outline(topic, num_slides):
         max_tokens=100,
         n=1
     )
-    outline = [choice.text.strip() for choice in response.choices]
+    
+    # Extract the text from the single completion choice
+    generated_text = response.choices[0].text.strip()
+    
+    # Split the generated text into individual slide titles
+    # This assumes that the generated text contains slide titles separated by newlines
+    outline = generated_text.split('\n')
+    
+    # Make sure that the number of slide titles matches num_slides
+    if len(outline) != num_slides:
+        print(f"Warning: Expected {num_slides} slide titles but received {len(outline)}")
     
     return outline
+
 
 def create_presentation(slides_content, company_name, presentation_name, presenter):
     # Initialize a Presentation object
