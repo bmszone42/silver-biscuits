@@ -12,60 +12,114 @@ TOKENS_PER_SLIDE_ESTIMATE = 200  # Rough estimate of tokens used per slide
 # Set OpenAI API key
 openai.api_key = st.secrets['OPENAI_KEY']
 
+# def generate_slide_content(title, engine):
+#     response = openai.Completion.create(
+#         engine="text-davinci-003",
+#         prompt=f"Generate content for the title: '{title}'\n\n Create one Short crisp title:\n1.",
+#         temperature=0.5,
+#         max_tokens=20,
+#         n=1
+#     )
+#     #crisp_title = [crisp.text.strip() for crisp in response.choices]
+#     crisp_title = response.choices[0].text.strip()
+
+#     response = openai.Completion.create(
+#         engine="text-davinci-003",
+#         prompt=f"Generate content for the title: '{title}'\n\n Create Three useful bullets of 10-14 words each:\n1.",
+#         temperature=0.5,
+#         max_tokens=50,
+#         n=1
+#     )
+#     bullets = [bullet.text.strip() for bullet in response.choices]
+
+#     response = openai.Completion.create(
+#         engine="text-davinci-003",
+#         prompt=f"Generate content for the title: '{title}'\n\n Create one short key takeaway message of 8 words or less:\n1.",
+#         temperature=0.5,
+#         max_tokens=20,
+#         n=1
+#     )
+#     #takeaway_message = [takeaway.text.strip() for takeaway in response.choices]
+#     takeaway_message = response.choices[0].text.strip()
+
+#     response = openai.Completion.create(
+#         engine="text-davinci-003",
+#         prompt=f"Generate slide content for the title: '{title}'\n\n Create Five detailed talking points of 30-40 words each:\n1.",
+#         temperature=0.5,
+#         max_tokens=100,
+#         n=1
+#     )
+#     talking_points = [point.text.strip() for point in response.choices]
+
+#     slide_content = {
+#         "crisp_title": crisp_title,
+#         "bullets": bullets,
+#         "takeaway_message": takeaway_message,
+#         "talking_points": talking_points
+#     }
+
+#     return slide_content
+
 def generate_slide_content(title, engine):
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=f"Generate content for the title: '{title}'\n\n Create one Short crisp title:\n1.",
-        temperature=0.5,
-        max_tokens=20,
-        n=1
-    )
-    #crisp_title = [crisp.text.strip() for crisp in response.choices]
-    crisp_title = response.choices[0].text.strip()
+    slide_content = {}
 
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=f"Generate content for the title: '{title}'\n\n Create Three useful bullets of 10-14 words each:\n1.",
-        temperature=0.5,
-        max_tokens=50,
-        n=1
-    )
-    bullets = [bullet.text.strip() for bullet in response.choices]
+    prompts = [
+        ("Crisp title", 20),
+        ("Three useful bullets of 10-14 words each", 50),
+        ("One short key takeaway message of 8 words or less", 20),
+        ("Five detailed talking points of 30-40 words each", 100)
+    ]
 
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=f"Generate content for the title: '{title}'\n\n Create one short key takeaway message of 8 words or less:\n1.",
-        temperature=0.5,
-        max_tokens=20,
-        n=1
-    )
-    #takeaway_message = [takeaway.text.strip() for takeaway in response.choices]
-    takeaway_message = response.choices[0].text.strip()
+    for prompt, max_tokens in prompts:
+        response = openai.Completion.create(
+            engine=engine,
+            prompt=f"Generate content for the title: '{title}'\n\n Create {prompt}:\n1.",
+            temperature=0.5,
+            max_tokens=max_tokens,
+            n=1
+        )
 
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=f"Generate slide content for the title: '{title}'\n\n Create Five detailed talking points of 30-40 words each:\n1.",
-        temperature=0.5,
-        max_tokens=100,
-        n=1
-    )
-    talking_points = [point.text.strip() for point in response.choices]
+        # Parsing the response
+        result = response.choices[0].text.strip().split('\n')
+        result = [r.strip() for r in result if r.strip()]
 
-    slide_content = {
-        "crisp_title": crisp_title,
-        "bullets": bullets,
-        "takeaway_message": takeaway_message,
-        "talking_points": talking_points
-    }
+        # Deciding whether it's a single string or a list
+        slide_content[prompt.lower().replace(" ", "_")] = result[0] if len(result) == 1 else result
 
     return slide_content
+
+
+# def generate_outline(presentation_topic, num_slides, engine):
+#     response = openai.Completion.create(
+#         engine="text-davinci-003",
+#         prompt=f"Generate {num_slides} slide titles for a presentation on the topic: '{presentation_topic}'.\n\n",
+#         temperature=0.5,
+#         max_tokens=20 * num_slides,  # Adjusted this to give the model more space to generate titles
+#         n=1
+#     )
+
+#     # Extract the text from the single completion choice
+#     generated_text = response.choices[0].text.strip()
+
+#     # Split the generated text into individual slide titles
+#     # This assumes that the generated text contains slide titles separated by newlines
+#     outline = generated_text.split('\n')
+
+#     # Remove the "Slide 1:", "Slide 2:", etc. prefixes
+#     outline = [slide[slide.find(":")+1:].strip() for slide in outline]
+
+#     # Make sure that the number of slide titles matches num_slides
+#     if len(outline) != num_slides:
+#         print(f"Warning: Expected {num_slides} slide titles but received {len(outline)}")
+
+#     return outline
 
 def generate_outline(presentation_topic, num_slides, engine):
     response = openai.Completion.create(
         engine="text-davinci-003",
         prompt=f"Generate {num_slides} slide titles for a presentation on the topic: '{presentation_topic}'.\n\n",
         temperature=0.5,
-        max_tokens=20 * num_slides,  # Adjusted this to give the model more space to generate titles
+        max_tokens=20 * num_slides,
         n=1
     )
 
@@ -73,11 +127,10 @@ def generate_outline(presentation_topic, num_slides, engine):
     generated_text = response.choices[0].text.strip()
 
     # Split the generated text into individual slide titles
-    # This assumes that the generated text contains slide titles separated by newlines
     outline = generated_text.split('\n')
 
     # Remove the "Slide 1:", "Slide 2:", etc. prefixes
-    outline = [slide[slide.find(":")+1:].strip() for slide in outline]
+    outline = [slide[slide.find(":")+1:].strip() if ":" in slide else slide.strip() for slide in outline]
 
     # Make sure that the number of slide titles matches num_slides
     if len(outline) != num_slides:
