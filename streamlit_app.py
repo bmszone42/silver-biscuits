@@ -125,6 +125,7 @@ def get_download_link(file_path):
         data = f.read()
     b64 = base64.b64encode(data).decode()
     return f'<a href="data:application/octet-stream;base64,{b64}" download="{file_path}">Download file</a>'
+
 def main():
     st.title('PowerPoint Presentation Creator')
 
@@ -138,16 +139,16 @@ def main():
     if st.sidebar.button('Generate Outline'):
         outline = generate_outline(topic, num_slides)
 
-        # Display the outline
-        st.write('Generated Outline:')
+        # Display the outline in the sidebar
+        st.sidebar.write('Generated Outline:')
         for slide_title in outline:
-            st.write(f'- {slide_title}')
+            st.sidebar.write(f'- {slide_title}')
 
         # Step 4: Allow the user to approve the Outline or generate a new outline
-        approved = st.checkbox('Approve Outline')
+        approved = st.sidebar.checkbox('Approve Outline')
         if not approved:
-            st.write("Outline not approved. Please generate a new outline.")
-            if st.button('Generate New Outline'):
+            st.sidebar.write("Outline not approved. Please generate a new outline.")
+            if st.sidebar.button('Generate New Outline'):
                 # Clear the previous outline
                 outline = []
         else:
@@ -182,4 +183,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
