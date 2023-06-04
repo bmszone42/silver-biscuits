@@ -60,34 +60,6 @@ openai.api_key = st.secrets['OPENAI_KEY']
 
 #     return slide_content
 
-def generate_slide_content(title, engine):
-    slide_content = {}
-
-    prompts = [
-        ("Crisp title", 20),
-        ("Three useful bullets of 10-14 words each", 50),
-        ("One short key takeaway message of 8 words or less", 20),
-        ("Five detailed talking points of 30-40 words each", 100)
-    ]
-
-    for prompt, max_tokens in prompts:
-        response = openai.Completion.create(
-            engine=engine,
-            prompt=f"Generate content for the title: '{title}'\n\n Create {prompt}:\n1.",
-            temperature=0.5,
-            max_tokens=max_tokens,
-            n=1
-        )
-
-        # Parsing the response
-        result = response.choices[0].text.strip().split('\n')
-        result = [r.strip() for r in result if r.strip()]
-
-        # Deciding whether it's a single string or a list
-        slide_content[prompt.lower().replace(" ", "_")] = result[0] if len(result) == 1 else result
-
-    return slide_content
-
 
 # def generate_outline(presentation_topic, num_slides, engine):
 #     response = openai.Completion.create(
@@ -114,25 +86,45 @@ def generate_slide_content(title, engine):
 
 #     return outline
 
+def generate_slide_content(title, engine):
+    slide_content = {}
+    prompts = [
+        ("Crisp title", 20),
+        ("Three useful bullets of 10-14 words each", 50),
+        ("One short key takeaway message of 8 words or less", 20),
+        ("Five detailed talking points of 30-40 words each", 100)
+    ]
+
+    for prompt, max_tokens in prompts:
+        response = openai.ChatCompletion.create(
+            model=engine,
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": f"Generate content for the title: '{title}'\n\n Create {prompt}:\n1."}
+            ]
+        )
+
+        result = response['choices'][0]['message']['content'].strip().split('\n')
+        result = [r.strip() for r in result if r.strip()]
+
+        slide_content[prompt.lower().replace(" ", "_")] = result[0] if len(result) == 1 else result
+
+    return slide_content
+
 def generate_outline(presentation_topic, num_slides, engine):
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=f"Generate {num_slides} slide titles for a presentation on the topic: '{presentation_topic}'.\n\n",
-        temperature=0.5,
-        max_tokens=20 * num_slides,
-        n=1
+    response = openai.ChatCompletion.create(
+        model=engine,
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": f"Generate {num_slides} slide titles for a presentation on the topic: '{presentation_topic}'."}
+        ]
     )
 
-    # Extract the text from the single completion choice
-    generated_text = response.choices[0].text.strip()
+    generated_text = response['choices'][0]['message']['content'].strip()
 
-    # Split the generated text into individual slide titles
     outline = generated_text.split('\n')
-
-    # Remove the "Slide 1:", "Slide 2:", etc. prefixes
     outline = [slide[slide.find(":")+1:].strip() if ":" in slide else slide.strip() for slide in outline]
 
-    # Make sure that the number of slide titles matches num_slides
     if len(outline) != num_slides:
         print(f"Warning: Expected {num_slides} slide titles but received {len(outline)}")
 
@@ -251,7 +243,7 @@ def main():
     num_slides = st.sidebar.number_input('Number of slides', min_value=1)
 
     # Step 2.1: Allow user to select engine
-    engine = st.sidebar.selectbox('Select model', ['text-davinci-003', 'gpt-3.5-turbo'])
+    engine = st.sidebar.selectbox('Select model', ['gpt-3.5-turbo'])
 
     # Step 3: Show estimated tokens and cost
     estimated_tokens = num_slides * TOKENS_PER_SLIDE_ESTIMATE
