@@ -167,6 +167,9 @@ def main():
 
     # Step 2: Allow the user to select n charts for the outline
     num_slides = st.sidebar.number_input('Number of slides', min_value=1)
+    
+    # Initialize 'outline' as an empty list
+    outline = []
 
     # Step 3: Generate the outline upon pressing Generate Outline
     if st.sidebar.button('Generate Outline'):
