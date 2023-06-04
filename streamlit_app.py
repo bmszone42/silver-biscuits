@@ -211,9 +211,11 @@ def main():
                 st.session_state['outline'] = generate_outline(presentation_topic, num_slides, engine)
                 
                 # Step 5: Display the outline in the sidebar
-                st.sidebar.write('Generated Outline:')
-                for slide_title in st.session_state['outline']:
-                    st.sidebar.write(f'{slide_title}')
+                if st.session_state['outline']:
+                    st.sidebar.write('Generated Outline:')
+                    for i, slide_title in enumerate(st.session_state['outline']):
+                        new_title = st.sidebar.text_input(f'Slide {i+1}', slide_title)
+                        st.session_state['outline'][i] = new_title
                 
             except Exception as e:
                 st.error(f"Failed to generate outline: {e}")
