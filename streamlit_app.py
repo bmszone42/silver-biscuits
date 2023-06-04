@@ -106,6 +106,8 @@ def create_presentation(slides_content, company_name, presentation_name, present
         txBox = slide.shapes.add_textbox(left, top, width, height)
         tf = txBox.text_frame
         p = tf.add_paragraph()
+        if isinstance(slide_content["takeaway_message"], list):
+            slide_content["takeaway_message"] = slide_content["takeaway_message"][0]
         p.text = slide_content["takeaway_message"]
         for paragraph in tf.paragraphs:
             for run in paragraph.runs:
