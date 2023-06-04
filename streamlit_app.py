@@ -209,25 +209,31 @@ def main():
         if st.sidebar.button('Generate Outline'):
             try:
                 st.session_state['outline'] = generate_outline(presentation_topic, num_slides, engine)
-                
-                # Step 5: Display the outline in the sidebar
+
+                # Step 5: Display the editable outline in the sidebar
                 if st.session_state['outline']:
                     st.sidebar.write('Generated Outline:')
                     for i, slide_title in enumerate(st.session_state['outline']):
                         new_title = st.sidebar.text_input(f'Slide {i+1}', slide_title)
-                        st.session_state['outline'][i] = new_title
-                
+                        if new_title != slide_title:
+                            st.session_state['outline'][i] = new_title
+
+                    # Add a button for the user to confirm their edits
+                    if st.sidebar.button('Confirm Outline Edits'):
+                        st.session_state['outline_edited'] = True
             except Exception as e:
                 st.error(f"Failed to generate outline: {e}")
 
         # Step 9: Generate slide content for each slide title in the outline
-        slides_content = []
-        for slide_title in st.session_state['outline']:
-            st.write(f"Generating slide content for: {slide_title}")
-            slide_content = generate_slide_content(slide_title, engine)
-            slides_content.append(slide_content)
+        if 'outline_edited' in st.session_state and st.session_state['outline_edited']:
+            slides_content = []
+            for slide_title in st.session_state['outline']:
+                st.write(f"Generating slide content for: {slide_title}")
+                slide_content = generate_slide_content(slide_title, engine)
+                slides_content.append(slide_content)
 
-        st.session_state['slides_content'] = slides_content
+            st.session_state['slides_content'] = slides_content
+
 
     # Step 10: Show the "Create Presentation" button 
     if 'slides_content' in st.session_state and st.session_state['slides_content']:
