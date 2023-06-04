@@ -16,9 +16,9 @@ openai.api_key = st.secrets['OPENAI_KEY']
 def generate_slide_content(title, engine='gpt-3.5-turbo'):
     slide_content = {}
     prompts = [
-        ("One descriptive short title of 5-7 words for this slide", 20),
-        ("Three useful bullets of 10-14 words each", 50),
-        ("One short key takeaway message of 8 words or less. If the engine returns a list of sentences, select only one.", 20),
+        ("One descriptive short title of 5-7 words for this slide", 10),
+        ("Three useful bullets of 10-14 words each", 30),
+        ("One short key takeaway message of 8 words or less. If the engine returns a list of sentences, select only one.", 10),
         ("Five detailed talking points of 30-40 words each", 100)
     ]
     
