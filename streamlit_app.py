@@ -224,15 +224,16 @@ def main():
             st.write(f"Generating slide content for: {slide_title}")
             slide_content = generate_slide_content(slide_title, engine)
             slides_content.append(slide_content)
-            
-            # Display the slide content in a formatted manner
-            st.write(f"Slide Content:\n{format_slide_content(slide_content)}")
 
         st.session_state['slides_content'] = slides_content
 
     # Step 10: Show the "Create Presentation" button 
     if 'slides_content' in st.session_state and st.session_state['slides_content']:
         if st.sidebar.button('Create Presentation'):
+            
+            # Display the slide content in a formatted manner
+            st.write(f"Slide Content:\n{format_slide_content(slide_content)}")
+            
             create_presentation(st.session_state['slides_content'], company_name, presentation_name, presenter)
             st.success('Presentation created successfully!')
             
