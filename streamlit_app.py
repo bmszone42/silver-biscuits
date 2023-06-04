@@ -171,10 +171,15 @@ def main():
 
     # Step 2: Allow the user to select n charts for the outline
     num_slides = st.sidebar.number_input('Number of slides', min_value=1)
+    
+    # Step 7: Prompt the user to enter their presenter name, presentation title, and company name
+    st.sidebar.title('Presentation Details')
+    company_name = st.sidebar.text_input('Company name', 'Company')
+    presentation_name = st.sidebar.text_input('Presentation name', 'Presentation')
+    presenter = st.sidebar.text_input('Presenter', 'Presenter')
 
     # Step 2.1: Allow user to select engine
     engine = st.sidebar.selectbox('Select model', ['gpt-3.5-turbo', 'gpt-4'])
-
 
     # Step 3: Show estimated tokens and cost
     estimated_tokens = num_slides * TOKENS_PER_SLIDE_ESTIMATE
@@ -204,30 +209,6 @@ def main():
             except Exception as e:
                 st.error(f"Failed to generate outline: {e}")
 
-    # Step 6: Allow the user to approve the Outline
-    if st.sidebar.button('Approve Outline'):
-        st.session_state['approved'] = True
-        
-    # Display the outline again in the sidebar if it's been approved
-    if 'approved' in st.session_state and st.session_state['approved']:
-        st.sidebar.write('Approved Outline:')
-        for slide_title in st.session_state['outline']:
-            st.sidebar.write(f'{slide_title}')
-
-    # Step 7: Prompt the user to enter their presenter name, presentation title, and company name
-    st.sidebar.title('Presentation Details')
-    company_name = st.sidebar.text_input('Company name', 'Company')
-    presentation_name = st.sidebar.text_input('Presentation name', 'Presentation')
-    presenter = st.sidebar.text_input('Presenter', 'Presenter')
-
-    # Step 8: Confirm entered details
-    if 'confirm_details' not in st.session_state:
-        st.session_state.confirm_details = False
-    st.session_state.confirm_details = st.sidebar.checkbox('Confirm details', value=st.session_state.confirm_details)
-
-        # If the Outline is approved and details are confirmed
-    if 'approved' in st.session_state and st.session_state['approved'] and st.session_state.confirm_details:
-
         # Step 9: Generate slide content for each slide title in the outline
         slides_content = []
         for slide_title in st.session_state['outline']:
@@ -241,7 +222,7 @@ def main():
         st.session_state['slides_content'] = slides_content
 
     # Step 10: Show the "Create Presentation" button 
-    if 'approved' in st.session_state and st.session_state['approved'] and st.session_state.confirm_details and 'slides_content' in st.session_state and st.session_state['slides_content']:
+    if 'slides_content' in st.session_state and st.session_state['slides_content']:
         if st.sidebar.button('Create Presentation'):
             create_presentation(st.session_state['slides_content'], company_name, presentation_name, presenter)
             st.success('Presentation created successfully!')
