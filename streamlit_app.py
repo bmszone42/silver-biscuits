@@ -205,24 +205,26 @@ def main():
     if estimated_tokens > MAX_TOKENS:
         st.warning(f"Estimated token usage is {estimated_tokens}, which is more than the maximum allowed ({MAX_TOKENS}). Consider reducing the number of slides.")
     else:
+        
         # Step 4: Generate the outline upon pressing Generate Outline
         if st.sidebar.button('Generate Outline'):
             try:
                 st.session_state['outline'] = generate_outline(presentation_topic, num_slides, engine)
+                st.session_state['outline_copy'] = list(st.session_state['outline'])  # Create a copy of the outline
 
                 # Step 5: Display the editable outline in the sidebar
                 if st.session_state['outline']:
                     st.sidebar.write('Generated Outline:')
-                    for i, slide_title in enumerate(st.session_state['outline']):
-                        new_title = st.sidebar.text_input(f'Slide {i+1}', slide_title)
-                        if new_title != slide_title:
-                            st.session_state['outline'][i] = new_title
+                    for i, slide_title in enumerate(st.session_state['outline_copy']):
+                        st.session_state['outline_copy'][i] = st.sidebar.text_input(f'Slide {i+1}', slide_title)
 
                     # Add a button for the user to confirm their edits
                     if st.sidebar.button('Confirm Outline Edits'):
+                        st.session_state['outline'] = list(st.session_state['outline_copy'])  # Update the outline
                         st.session_state['outline_edited'] = True
             except Exception as e:
                 st.error(f"Failed to generate outline: {e}")
+
 
         # Step 9: Generate slide content for each slide title in the outline
         if 'outline_edited' in st.session_state and st.session_state['outline_edited']:
