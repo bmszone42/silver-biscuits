@@ -223,8 +223,8 @@ def main():
             slide_content = generate_slide_content(slide_title, engine)
             slides_content.append(slide_content)
             
-        # Display the slide content in a formatted manner
-        st.write(f"Slide Content:\n{format_slide_content(slide_content)}")
+            # Display the slide content in a formatted manner
+            st.write(f"Slide Content:\n{format_slide_content(slide_content)}")
 
         # Step 10: Show the "Create Presentation" button 
         if st.sidebar.button('Create Presentation'):
