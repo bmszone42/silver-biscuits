@@ -21,6 +21,13 @@ def generate_slide_content(title, engine='gpt-3.5-turbo'):
         ("One short key takeaway message of 8 words or less", 20),
         ("Five detailed talking points of 30-40 words each", 100)
     ]
+    
+    key_mapping = {
+        "One descriptive short title of 5-7 words for this slide": "crisp_title",
+        "Three useful bullets of 10-14 words each": "bullets",
+        "One short key takeaway message of 8 words or less": "takeaway_message",
+        "Five detailed talking points of 30-40 words each": "talking_points"
+    }
 
     for prompt, max_tokens in prompts:
         response = openai.ChatCompletion.create(
@@ -37,7 +44,9 @@ def generate_slide_content(title, engine='gpt-3.5-turbo'):
         # Remove any leading numbers from the AI's output to prevent double numbering
         result = [re.sub(r'^\d+\.\s*', '', r) for r in result]
 
-        slide_content[prompt.lower().replace(" ", "_")] = result[0] if len(result) == 1 else result
+        #slide_content[prompt.lower().replace(" ", "_")] = result[0] if len(result) == 1 else result
+        slide_content[key_mapping[prompt]] = result[0] if len(result) == 1 else result
+
 
     return slide_content
 
