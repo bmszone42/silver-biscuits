@@ -15,7 +15,7 @@ openai.api_key = st.secrets['OPENAI_KEY']
 def generate_slide_content(title, engine='gpt-3.5-turbo'):
     slide_content = {}
     prompts = [
-        ("Crisp title", 20),
+        ("One descriptive short title of 5-7 words for this slide", 20),
         ("Three useful bullets of 10-14 words each", 50),
         ("One short key takeaway message of 8 words or less", 20),
         ("Five detailed talking points of 30-40 words each", 100)
@@ -32,6 +32,9 @@ def generate_slide_content(title, engine='gpt-3.5-turbo'):
 
         result = response['choices'][0]['message']['content'].strip().split('\n')
         result = [r.strip() for r in result if r.strip()]
+        
+        # Remove any leading numbers from the AI's output to prevent double numbering
+        result = [re.sub(r'^\d+\.\s*', '', r) for r in result]
 
         slide_content[prompt.lower().replace(" ", "_")] = result[0] if len(result) == 1 else result
 
@@ -169,7 +172,8 @@ def main():
     num_slides = st.sidebar.number_input('Number of slides', min_value=1)
 
     # Step 2.1: Allow user to select engine
-    engine = st.sidebar.selectbox('Select model', ['text-davinci-003', 'gpt-3.5-turbo'])
+    engine = st.sidebar.selectbox('Select model', ['gpt-3.5-turbo', 'gpt-4'])
+
 
     # Step 3: Show estimated tokens and cost
     estimated_tokens = num_slides * TOKENS_PER_SLIDE_ESTIMATE
