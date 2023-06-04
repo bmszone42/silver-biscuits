@@ -195,22 +195,24 @@ def main():
         if st.sidebar.button('Generate Outline'):
             try:
                 st.session_state['outline'] = generate_outline(presentation_topic, num_slides, engine)
+                
+                # Step 5: Display the outline in the sidebar
+                st.sidebar.write('Generated Outline:')
+                for slide_title in st.session_state['outline']:
+                    st.sidebar.write(f'{slide_title}')
+                
             except Exception as e:
                 st.error(f"Failed to generate outline: {e}")
-
-            # Step 5: Display the outline in the sidebar
-            st.sidebar.write('Generated Outline:')
-            for slide_title in st.session_state['outline']:
-                st.sidebar.write(f'{slide_title}')
 
     # Step 6: Allow the user to approve the Outline
     if st.sidebar.button('Approve Outline'):
         st.session_state['approved'] = True
         
-    # Display the outline in the sidebar
-    st.sidebar.write('Outline:')
-    for slide_title in st.session_state['outline']:
-        st.sidebar.write(f'{slide_title}')
+    # Display the outline again in the sidebar if it's been approved
+    if 'approved' in st.session_state and st.session_state['approved']:
+        st.sidebar.write('Approved Outline:')
+        for slide_title in st.session_state['outline']:
+            st.sidebar.write(f'{slide_title}')
 
     # Step 7: Prompt the user to enter their presenter name, presentation title, and company name
     st.sidebar.title('Presentation Details')
