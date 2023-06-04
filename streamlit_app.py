@@ -4,6 +4,7 @@ from pptx.util import Inches, Pt
 from pptx import Presentation
 import base64
 import openai
+import re
 from collections.abc import Iterable
 
 MAX_TOKENS = 4096  # Maximum tokens allowed in a single API call
@@ -205,6 +206,11 @@ def main():
     # Step 6: Allow the user to approve the Outline
     if st.sidebar.button('Approve Outline'):
         st.session_state['approved'] = True
+        
+    # Display the outline in the sidebar
+    st.sidebar.write('Outline:')
+    for slide_title in st.session_state['outline']:
+        st.sidebar.write(f'{slide_title}')
 
     # Step 7: Prompt the user to enter their presenter name, presentation title, and company name
     st.sidebar.title('Presentation Details')
