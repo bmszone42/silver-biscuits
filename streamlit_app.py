@@ -12,7 +12,7 @@ TOKENS_PER_SLIDE_ESTIMATE = 200  # Rough estimate of tokens used per slide
 # Set OpenAI API key
 openai.api_key = st.secrets['OPENAI_KEY']
 
-def generate_slide_content(title, engine):
+def generate_slide_content(title, engine='gpt-3.5-turbo'):
     slide_content = {}
     prompts = [
         ("Crisp title", 20),
@@ -37,7 +37,7 @@ def generate_slide_content(title, engine):
 
     return slide_content
 
-def generate_outline(presentation_topic, num_slides, engine):
+def generate_outline(presentation_topic, num_slides, engine='gpt-3.5-turbo'):
     response = openai.ChatCompletion.create(
         model=engine,
         messages=[
@@ -105,7 +105,7 @@ def create_presentation(slides_content, company_name, presentation_name, present
             notes_tf.add_paragraph().text = talking_point
 
     # Save the presentation
-    #presentation.save("SlideDeck.pptx")
+    presentation.save("SlideDeck.pptx")
 
 def get_download_link(file_path):
     with open(file_path, 'rb') as f:
