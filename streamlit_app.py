@@ -25,7 +25,7 @@ def generate_slide_content(title, engine='gpt-3.5-turbo'):
     key_mapping = {
         "One descriptive short title of 5-7 words for this slide": "crisp_title",
         "Three useful bullets of 10-14 words each": "bullets",
-        "One short key takeaway message of 8 words or less": "takeaway_message",
+        "One short key takeaway message of 8 words or less. If the engine returns a list of sentences, select only one.": "takeaway_message",
         "Five detailed talking points of 30-40 words each": "talking_points"
     }
 
