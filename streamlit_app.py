@@ -163,55 +163,84 @@ def main():
     setup_app_title()
     setup_sidebar_style()
     # Step 1: Allow user to enter a topic
-    topic = st.sidebar.text_input('Topic')
+    presentation_topic = st.sidebar.text_input('Topic for the PowerPoint Deck')
 
     # Step 2: Allow the user to select n charts for the outline
     num_slides = st.sidebar.number_input('Number of slides', min_value=1)
-    
-    # Initialize 'outline' as an empty list
-    outline = []
 
-    # Step 3: Generate the outline upon pressing Generate Outline
-    if st.sidebar.button('Generate Outline'):
-        outline = generate_outline(topic, num_slides)
+    # Step 2.1: Allow user to select engine
+    engine = st.sidebar.selectbox('Select model', ['text-davinci-003', 'gpt-3.5-turbo'])
 
-        # Step 4: Display the outline in the sidebar
-        st.sidebar.write('Generated Outline:')
-        for slide_title in outline:
-            st.sidebar.write(f'- {slide_title}')
+    # Step 3: Show estimated tokens and cost
+    estimated_tokens = num_slides * TOKENS_PER_SLIDE_ESTIMATE
+    st.sidebar.write(f"Estimated token usage: {estimated_tokens}")
+    cost_per_1k_tokens = 0.002 if engine == 'gpt-3.5-turbo' else 0.02  # Adjust cost based on engine
+    estimated_cost = estimated_tokens / 1000 * cost_per_1k_tokens
+    st.sidebar.write(f"Estimated cost: ${estimated_cost}")
 
-    # Step 5: Allow the user to approve the Outline
-    approved = st.sidebar.checkbox('Approve Outline')
+    # Before the 'Generate Outline' button press
+    if 'outline' not in st.session_state:
+        st.session_state['outline'] = []
+        st.session_state['approved'] = False
 
-    # Step 6: If the Outline is approved, generate a python dictionary with content for the presentation
-    if approved:
-        # Step 7: Generate slide content for each slide title in the outline
+    if estimated_tokens > MAX_TOKENS:
+        st.warning(f"Estimated token usage is {estimated_tokens}, which is more than the maximum allowed ({MAX_TOKENS}). Consider reducing the number of slides.")
+    else:
+        # Step 4: Generate the outline upon pressing Generate Outline
+        if st.sidebar.button('Generate Outline'):
+            try:
+                st.session_state['outline'] = generate_outline(presentation_topic, num_slides, engine)
+            except Exception as e:
+                st.error(f"Failed to generate outline: {e}")
+
+            # Step 5: Display the outline in the sidebar
+            st.sidebar.write('Generated Outline:')
+            for slide_title in st.session_state['outline']:
+                st.sidebar.write(f'{slide_title}')
+
+    # Step 6: Allow the user to approve the Outline
+    if st.sidebar.button('Approve Outline'):
+        st.session_state['approved'] = True
+
+    # Step 7: Prompt the user to enter their presenter name, presentation title, and company name
+    st.sidebar.title('Presentation Details')
+    company_name = st.sidebar.text_input('Company name', 'Company')
+    presentation_name = st.sidebar.text_input('Presentation name', 'Presentation')
+    presenter = st.sidebar.text_input('Presenter', 'Presenter')
+
+    # Step 8: Confirm entered details
+    if 'confirm_details' not in st.session_state:
+        st.session_state.confirm_details = False
+    st.session_state.confirm_details = st.sidebar.checkbox('Confirm details', value=st.session_state.confirm_details)
+
+        # If the Outline is approved and details are confirmed
+    if 'approved' in st.session_state and st.session_state['approved'] and st.session_state.confirm_details:
+
+        # Step 9: Generate slide content for each slide title in the outline
         slides_content = []
-        for slide_title in outline:
+        for slide_title in st.session_state['outline']:
             st.write(f"Generating slide content for: {slide_title}")
-            slide_content = generate_slide_content(slide_title)
+            slide_content = generate_slide_content(slide_title, engine)
             slides_content.append(slide_content)
-            # Display the slide content dictionary
-            st.write(f"Slide Content: {slide_content}")
+            
+            # Display the slide content in a formatted manner
+            st.write(f"Slide Content:\n{format_slide_content(slide_content)}")
 
-        # Step 8: Prompt the user to enter their presenter name, presentation title, and company name
-        st.sidebar.title('Presentation Details')
-        company_name = st.sidebar.text_input('Company name', 'Company')
-        presentation_name = st.sidebar.text_input('Presentation name', 'Presentation')
-        presenter = st.sidebar.text_input('Presenter', 'Presenter')
+            # Step 10: Show the "Create Presentation" button
+            if st.sidebar.button('Create Presentation'):
+                create_presentation(slides_content, company_name, presentation_name, presenter)
+                st.success('Presentation created successfully!')
 
-        # Step 9: Show the "Create Presentation" button
-        if st.sidebar.button('Create Presentation'):
-            create_presentation(slides_content, company_name, presentation_name, presenter)
-            st.success('Presentation created successfully!')
+                # Step 11: Allow the user to download the presentation with a link
+                download_link = get_download_link("SlideDeck.pptx")
+                st.markdown(download_link, unsafe_allow_html=True)
 
-            # Step 10: Allow the user to download the presentation with a link
-            download_link = get_download_link("SlideDeck.pptx")
-            st.markdown(download_link, unsafe_allow_html=True)
-
+     # Reset Button
+    if st.sidebar.button('Reset'):
+        reset_all()
+      
 if __name__ == "__main__":
     main()
-
 
 
 
