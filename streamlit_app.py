@@ -227,16 +227,16 @@ def main():
                 st.session_state['outline'] = list(st.session_state['outline_copy'])  # Update the outline
                 st.session_state['outline_edited'] = True
 
-        # Step 9: Generate slide content for each slide title in the outline
-        if 'outline_edited' in st.session_state and st.session_state['outline_edited']:
-            slides_content = []
-            for slide_title in st.session_state['outline']:
-                st.write(f"Generating slide content for: {slide_title}")
-                slide_content = generate_slide_content(slide_title, engine)
-                slides_content.append(slide_content)
+            # Step 9: Generate slide content for each slide title in the outline
+            if 'outline_edited' in st.session_state and st.session_state['outline_edited']:
+                if 'slides_content' not in st.session_state:
+                    slides_content = []
+                    for slide_title in st.session_state['outline']:
+                        st.write(f"Generating slide content for: {slide_title}")
+                        slide_content = generate_slide_content(slide_title, engine)
+                        slides_content.append(slide_content)
 
-            st.session_state['slides_content'] = slides_content
-
+                    st.session_state['slides_content'] = slides_content
 
     # Step 10: Show the "Create Presentation" button 
     if 'slides_content' in st.session_state and st.session_state['slides_content']:
