@@ -13,6 +13,14 @@ TOKENS_PER_SLIDE_ESTIMATE = 200  # Rough estimate of tokens used per slide
 # Set OpenAI API key
 openai.api_key = st.secrets['OPENAI_KEY']
 
+# Function to calculate token counts from API response
+def calculate_token_counts(response):
+    usage = response['usage']
+    prompt_tokens = usage['prompt_tokens']
+    completion_tokens = usage['completion_tokens']
+    total_tokens = usage['total_tokens']
+    return prompt_tokens, completion_tokens, total_tokens
+
 def generate_slide_content(title, engine='gpt-3.5-turbo'):
     slide_content = {}
     prompts = [
@@ -37,6 +45,12 @@ def generate_slide_content(title, engine='gpt-3.5-turbo'):
                 {"role": "user", "content": f"Generate content for the title: '{title}'\n\n Create {prompt}:\n1."}
             ]
         )
+
+        prompt_tokens, completion_tokens, total_tokens = calculate_token_counts(response)
+        slide_content['api_calls'] = slide_content.get('api_calls', 0) + 1
+        slide_content['prompt_tokens'] = slide_content.get('prompt_tokens', 0) + prompt_tokens
+        slide_content['completion_tokens'] = slide_content.get('completion_tokens', 0) + completion_tokens
+        slide_content['total_tokens'] = slide_content.get('total_tokens', 0) + total_tokens
 
         result = response['choices'][0]['message']['content'].strip().split('\n')
         result = [r.strip() for r in result if r.strip()]
@@ -211,8 +225,16 @@ def main():
         # Step 4: Generate the outline upon pressing Generate Outline
         if st.sidebar.button('Generate Outline'):
             try:
-                st.session_state['outline'] = generate_outline(presentation_topic, num_slides, engine)
+                #st.session_state['outline'] = generate_outline(presentation_topic, num_slides, engine)
+                #st.session_state['outline_copy'] = list(st.session_state['outline'])  # Create a copy of the outline
+                outline, outline_api_calls, outline_prompt_tokens, outline_completion_tokens, outline_total_tokens = generate_outline(presentation_topic, num_slides, engine)
+                st.session_state['outline'] = outline
                 st.session_state['outline_copy'] = list(st.session_state['outline'])  # Create a copy of the outline
+                st.session_state['outline_api_calls'] = outline_api_calls
+                st.session_state['outline_prompt_tokens'] = outline_prompt_tokens
+                st.session_state['outline_completion_tokens'] = outline_completion_tokens
+                st.session_state['outline_total_tokens'] = outline_total_tokens
+
 
             except Exception as e:
                 st.error(f"Failed to generate outline: {e}")
@@ -232,12 +254,27 @@ def main():
             if 'outline_edited' in st.session_state and st.session_state['outline_edited']:
                 if 'slides_content' not in st.session_state:
                     slides_content = []
+                    slides_api_calls = 0
+                    slides_prompt_tokens = 0
+                    slides_completion_tokens = 0
+                    slides_total_tokens = 0
+
                     for slide_title in st.session_state['outline']:
                         st.write(f"Generating slide content for: {slide_title}")
-                        slide_content = generate_slide_content(slide_title, engine)
+                        slide_content, api_calls, prompt_tokens, completion_tokens, total_tokens = generate_slide_content(slide_title, engine)
                         slides_content.append(slide_content)
+                        slides_api_calls += api_calls
+                        slides_prompt_tokens += prompt_tokens
+                        slides_completion_tokens += completion_tokens
+                        slides_total_tokens += total_tokens
 
                     st.session_state['slides_content'] = slides_content
+                    st.session_state['slides_api_calls'] = slides_api_calls
+                    st.session_state['slides_prompt_tokens'] = slides_prompt_tokens
+                    st.session_state['slides_completion_tokens'] = slides_completion_tokens
+                    st.session_state['slides_total_tokens'] = slides_total_tokens
+
+                    #st.session_state['slides_content'] = slides_content
 
     # Step 10: Show the "Create Presentation" button 
     if 'slides_content' in st.session_state and st.session_state['slides_content']:
@@ -252,6 +289,20 @@ def main():
             # Step 11: Allow the user to download the presentation with a link
             download_link = get_download_link("SlideDeck.pptx")
             st.markdown(download_link, unsafe_allow_html=True)
+            
+            # Display the API call and token count totals
+            st.write("API Call and Token Count Totals:")
+            st.write(f"Outline:")
+            st.write(f"  API Calls: {st.session_state['outline_api_calls']}")
+            st.write(f"  Prompt Tokens: {st.session_state['outline_prompt_tokens']}")
+            st.write(f"  Completion Tokens: {st.session_state['outline_completion_tokens']}")
+            st.write(f"  Total Tokens: {st.session_state['outline_total_tokens']}")
+
+            st.write(f"Slides Content:")
+            st.write(f"  API Calls: {st.session_state['slides_api_calls']}")
+            st.write(f"  Prompt Tokens: {st.session_state['slides_prompt_tokens']}")
+            st.write(f"  Completion Tokens: {st.session_state['slides_completion_tokens']}")
+            st.write(f"  Total Tokens: {st.session_state['slides_total_tokens']}")
 
             
      # Reset Button
