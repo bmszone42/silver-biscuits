@@ -209,7 +209,6 @@ def main():
     else:
         
         # Step 4: Generate the outline upon pressing Generate Outline
-        # Step 4: Generate the outline upon pressing Generate Outline
         if st.sidebar.button('Generate Outline'):
             try:
                 st.session_state['outline'] = generate_outline(presentation_topic, num_slides, engine)
@@ -245,7 +244,7 @@ def main():
         if st.sidebar.button('Create Presentation'):
             
             # Display the slide content in a formatted manner
-            #st.write(f"Slide Content:\n{format_slide_content(slide_content)}")
+            st.write(f"Slide Content:\n{format_slide_content(slide_content)}")
             
             create_presentation(st.session_state['slides_content'], company_name, presentation_name, presenter)
             st.success('Presentation created successfully!')
