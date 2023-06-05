@@ -65,6 +65,11 @@ def generate_slide_content(title, engine='gpt-3.5-turbo'):
     return slide_content
 
 def generate_outline(presentation_topic, num_slides, engine='gpt-3.5-turbo'):
+    api_calls = 0
+    prompt_tokens = 0
+    completion_tokens = 0
+    total_tokens = 0
+    
     response = openai.ChatCompletion.create(
         model=engine,
         messages=[
@@ -81,7 +86,13 @@ def generate_outline(presentation_topic, num_slides, engine='gpt-3.5-turbo'):
     if len(outline) != num_slides:
         print(f"Warning: Expected {num_slides} slide titles but received {len(outline)}")
 
-    return outline
+    # Calculate token counts
+    prompt_tokens += response['usage']['prompt_tokens']
+    completion_tokens += response['usage']['completion_tokens']
+    total_tokens += response['usage']['total_tokens']
+
+    return outline, api_calls, prompt_tokens, completion_tokens, total_tokens
+    #return outline
 
 def create_presentation(slides_content, company_name, presentation_name, presenter):
     # Initialize a Presentation object
