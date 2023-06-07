@@ -98,6 +98,7 @@ def generate_outline(presentation_topic, num_slides, engine='gpt-3.5-turbo'):
     prompt_tokens += response['usage']['prompt_tokens']
     completion_tokens += response['usage']['completion_tokens']
     total_tokens += response['usage']['total_tokens']
+    time.sleep(10)
 
     return outline, api_calls, prompt_tokens, completion_tokens, total_tokens
     #return outline
