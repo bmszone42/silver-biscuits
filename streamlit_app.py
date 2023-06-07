@@ -73,10 +73,6 @@ def generate_slide_content(title, engine='gpt-3.5-turbo'):
     return slide_content, api_calls, prompt_tokens, completion_tokens, total_tokens
 
 def generate_outline(presentation_topic, num_slides, engine='gpt-3.5-turbo'):
-    api_calls = 0
-    prompt_tokens = 0
-    completion_tokens = 0
-    total_tokens = 0
     
     response = openai.ChatCompletion.create(
         model=engine,
@@ -94,14 +90,8 @@ def generate_outline(presentation_topic, num_slides, engine='gpt-3.5-turbo'):
     if len(outline) != num_slides:
         print(f"Warning: Expected {num_slides} slide titles but received {len(outline)}")
 
-    # Calculate token counts
-    prompt_tokens += response['usage']['prompt_tokens']
-    completion_tokens += response['usage']['completion_tokens']
-    total_tokens += response['usage']['total_tokens']
-    time.sleep(10)
-
-    return outline, api_calls, prompt_tokens, completion_tokens, total_tokens
-    #return outline
+    #return outline, api_calls, prompt_tokens, completion_tokens, total_tokens
+    return outline
 
 #def create_presentation(slides_content, company_name, presentation_name, presenter):
 def create_presentation(slides_content, company_name, presentation_name, presenter, logo_path):
@@ -265,16 +255,10 @@ def main():
         # Step 4: Generate the outline upon pressing Generate Outline
         if st.sidebar.button('Generate Outline'):
             try:
-                #st.session_state['outline'] = generate_outline(presentation_topic, num_slides, engine)
-                #st.session_state['outline_copy'] = list(st.session_state['outline'])  # Create a copy of the outline
-                outline, outline_api_calls, outline_prompt_tokens, outline_completion_tokens, outline_total_tokens = generate_outline(presentation_topic, num_slides, engine)
-                st.session_state['outline'] = outline
+                st.session_state['outline'] = generate_outline(presentation_topic, num_slides, engine)
                 st.session_state['outline_copy'] = list(st.session_state['outline'])  # Create a copy of the outline
-                st.session_state['outline_api_calls'] = outline_api_calls
-                st.session_state['outline_prompt_tokens'] = outline_prompt_tokens
-                st.session_state['outline_completion_tokens'] = outline_completion_tokens
-                st.session_state['outline_total_tokens'] = outline_total_tokens
-
+                #outline, outline_api_calls, outline_prompt_tokens, outline_completion_tokens, outline_total_tokens = generate_outline(presentation_topic, num_slides, engine)
+     
 
             except Exception as e:
                 st.error(f"Failed to generate outline: {e}")
@@ -294,10 +278,6 @@ def main():
             if 'outline_edited' in st.session_state and st.session_state['outline_edited']:
                 if 'slides_content' not in st.session_state:
                     slides_content = []
-                    slides_api_calls = 0
-                    slides_prompt_tokens = 0
-                    slides_completion_tokens = 0
-                    slides_total_tokens = 0
 
                     for slide_title in st.session_state['outline']:
                         st.write(f"Generating slide content for: {slide_title}")
@@ -342,13 +322,6 @@ def main():
             
             # Display the API call and token count totals
             st.write("API Call and Token Count Totals:")
-            st.write(f"Outline:")
-            st.write(f"  API Calls: {st.session_state['outline_api_calls']}")
-            st.write(f"  Prompt Tokens: {st.session_state['outline_prompt_tokens']}")
-            st.write(f"  Completion Tokens: {st.session_state['outline_completion_tokens']}")
-            st.write(f"  Total Tokens: {st.session_state['outline_total_tokens']}")
-
-            st.write(f"Slides Content:")
             st.write(f"  API Calls: {st.session_state['slides_api_calls']}")
             st.write(f"  Prompt Tokens: {st.session_state['slides_prompt_tokens']}")
             st.write(f"  Completion Tokens: {st.session_state['slides_completion_tokens']}")
