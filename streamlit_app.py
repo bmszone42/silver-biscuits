@@ -135,7 +135,7 @@ def create_presentation(slides_content, company_name, presentation_name, present
         left = Inches(1)
         top = Inches(6)
         width = Inches(6)
-        height = Inches(2)
+        height = Inches(1)
         txBox = slide.shapes.add_textbox(left, top, width, height)
         tf = txBox.text_frame
         p = tf.add_paragraph()
