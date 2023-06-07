@@ -6,6 +6,7 @@ import base64
 import openai
 import re
 from collections.abc import Iterable
+import time
 
 MAX_TOKENS = 4096  # Maximum tokens allowed in a single API call
 TOKENS_PER_SLIDE_ESTIMATE = 200  # Rough estimate of tokens used per slide
@@ -285,6 +286,7 @@ def main():
                         slides_prompt_tokens += prompt_tokens
                         slides_completion_tokens += completion_tokens
                         slides_total_tokens += total_tokens
+                        time.sleep(10)
 
                     st.session_state['slides_content'] = slides_content
                     st.session_state['slides_api_calls'] = slides_api_calls
