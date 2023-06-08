@@ -221,6 +221,9 @@ def setup_sidebar_style():
 def main():
     setup_app_title()
     setup_sidebar_style()
+    
+    slides_api_calls = 0
+
     # Step 1: Allow user to enter a topic
     presentation_topic = st.sidebar.text_input('Topic for the PowerPoint Deck')
 
