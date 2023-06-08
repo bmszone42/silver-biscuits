@@ -93,7 +93,7 @@ def generate_outline(presentation_topic, num_slides, engine='gpt-3.5-turbo'):
     return outline
 
 #def create_presentation(slides_content, company_name, presentation_name, presenter):
-def create_presentation(slides_content, company_name, presentation_name, presenter, logo_path):
+def create_presentation(slides_content, company_name, presentation_name, presenter):
  
     # Initialize a Presentation object
     presentation = Presentation()
@@ -113,7 +113,7 @@ def create_presentation(slides_content, company_name, presentation_name, present
         slide = presentation.slides.add_slide(slide_layout)
         
         # Add the logo
-        slide = insert_logo(slide, logo_path)
+        #slide = insert_logo(slide, logo_path)
 
         # Set the title
         title = slide.shapes.title
@@ -173,20 +173,20 @@ def format_slide_content(slide_content):
         formatted_content += "\n"  # Add '\n' here to create a space between different key-value pairs
     return formatted_content
 
-def insert_logo(slide, logo_path):
-    """
-    Function to insert a logo on a slide
-    """
-    # Define the width, height, and coordinates for the logo
-    logo_width = 1 * Inches(1.0)
-    logo_height = 1 * Inches(1.0)
-    logo_left = Inches(0.5)
-    logo_top = Inches(0.5)
+# def insert_logo(slide, logo_path):
+#     """
+#     Function to insert a logo on a slide
+#     """
+#     # Define the width, height, and coordinates for the logo
+#     logo_width = 1 * Inches(1.0)
+#     logo_height = 1 * Inches(1.0)
+#     logo_left = Inches(0.5)
+#     logo_top = Inches(0.5)
 
-    # Add the logo to the slide
-    pic = slide.shapes.add_picture(logo_path, logo_left, logo_top, logo_width, logo_height)
+#     # Add the logo to the slide
+#     pic = slide.shapes.add_picture(logo_path, logo_left, logo_top, logo_width, logo_height)
 
-    return slide
+#     return slide
 
 def setup_app_title():
     st.markdown("""
@@ -311,14 +311,14 @@ def main():
             #st.write(f"Slide Content:\n{format_slide_content(slide_content)}")
             
             #create_presentation(st.session_state['slides_content'], company_name, presentation_name, presenter)
-            logo = st.sidebar.file_uploader("Upload a logo (png)", type=["png"])
+#             logo = st.sidebar.file_uploader("Upload a logo (png)", type=["png"])
 
-            if logo is not None:
-                with open("logo.png", "wb") as f:
-                    f.write(logo.getbuffer())
+#             if logo is not None:
+#                 with open("logo.png", "wb") as f:
+#                     f.write(logo.getbuffer())
 
                 # Pass the logo path to the create_presentation function
-                create_presentation(st.session_state['slides_content'], company_name, presentation_name, presenter, "logo.png")
+                create_presentation(st.session_state['slides_content'], company_name, presentation_name, presenter)
 
             st.success('Presentation created successfully!')
             
