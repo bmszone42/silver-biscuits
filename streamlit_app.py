@@ -65,7 +65,7 @@ def generate_slide_content(title, engine='gpt-3.5-turbo'):
         result = [re.sub(r'^\d+\.\s*', '', r) for r in result]
 
         slide_content[key_mapping[prompt]] = result[0] if len(result) == 1 else result
-
+        time.sleep(10)
 
     #return slide_content
     return slide_content, api_calls, prompt_tokens, completion_tokens, total_tokens
