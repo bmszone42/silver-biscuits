@@ -266,12 +266,12 @@ def main():
                         st.write(f"Generating slide content for: {slide_title}")
                         slide_content, api_calls, prompt_tokens, completion_tokens, total_tokens = generate_slide_content(slide_title, engine)
                         slides_content.append(slide_content)
+                        time.sleep(15)
                         slides_api_calls += api_calls
                         slides_prompt_tokens += prompt_tokens
                         slides_completion_tokens += completion_tokens
                         slides_total_tokens += total_tokens
-                        time.sleep(15)
-
+                        
                     st.session_state['slides_content'] = slides_content
                     st.session_state['slides_api_calls'] = slides_api_calls
                     st.session_state['slides_prompt_tokens'] = slides_prompt_tokens
