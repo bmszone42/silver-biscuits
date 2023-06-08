@@ -173,21 +173,6 @@ def format_slide_content(slide_content):
         formatted_content += "\n"  # Add '\n' here to create a space between different key-value pairs
     return formatted_content
 
-# def insert_logo(slide, logo_path):
-#     """
-#     Function to insert a logo on a slide
-#     """
-#     # Define the width, height, and coordinates for the logo
-#     logo_width = 1 * Inches(1.0)
-#     logo_height = 1 * Inches(1.0)
-#     logo_left = Inches(0.5)
-#     logo_top = Inches(0.5)
-
-#     # Add the logo to the slide
-#     pic = slide.shapes.add_picture(logo_path, logo_left, logo_top, logo_width, logo_height)
-
-#     return slide
-
 def setup_app_title():
     st.markdown("""
     <style>
@@ -310,15 +295,7 @@ def main():
             # Display the slide content in a formatted manner
             #st.write(f"Slide Content:\n{format_slide_content(slide_content)}")
             
-            #create_presentation(st.session_state['slides_content'], company_name, presentation_name, presenter)
-#             logo = st.sidebar.file_uploader("Upload a logo (png)", type=["png"])
-
-#             if logo is not None:
-#                 with open("logo.png", "wb") as f:
-#                     f.write(logo.getbuffer())
-
-                # Pass the logo path to the create_presentation function
-                create_presentation(st.session_state['slides_content'], company_name, presentation_name, presenter)
+            create_presentation(st.session_state['slides_content'], company_name, presentation_name, presenter)
 
             st.success('Presentation created successfully!')
             
