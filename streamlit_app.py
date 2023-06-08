@@ -64,7 +64,6 @@ def generate_slide_content(title, engine='gpt-3.5-turbo'):
         # Remove any leading numbers from the AI's output to prevent double numbering
         result = [re.sub(r'^\d+\.\s*', '', r) for r in result]
 
-        #slide_content[prompt.lower().replace(" ", "_")] = result[0] if len(result) == 1 else result
         slide_content[key_mapping[prompt]] = result[0] if len(result) == 1 else result
 
 
@@ -92,7 +91,6 @@ def generate_outline(presentation_topic, num_slides, engine='gpt-3.5-turbo'):
     #return outline, api_calls, prompt_tokens, completion_tokens, total_tokens
     return outline
 
-#def create_presentation(slides_content, company_name, presentation_name, presenter):
 def create_presentation(slides_content, company_name, presentation_name, presenter):
  
     # Initialize a Presentation object
@@ -111,9 +109,6 @@ def create_presentation(slides_content, company_name, presentation_name, present
         # Add a new slide with a title and content layout
         slide_layout = presentation.slide_layouts[1]
         slide = presentation.slides.add_slide(slide_layout)
-        
-        # Add the logo
-        #slide = insert_logo(slide, logo_path)
 
         # Set the title
         title = slide.shapes.title
@@ -211,7 +206,6 @@ def main():
     slides_completion_tokens = 0
     slides_total_tokens = 0
 
-
     # Step 1: Allow user to enter a topic
     presentation_topic = st.sidebar.text_input('Topic for the PowerPoint Deck')
 
@@ -248,8 +242,6 @@ def main():
             try:
                 st.session_state['outline'] = generate_outline(presentation_topic, num_slides, engine)
                 st.session_state['outline_copy'] = list(st.session_state['outline'])  # Create a copy of the outline
-                #outline, outline_api_calls, outline_prompt_tokens, outline_completion_tokens, outline_total_tokens = generate_outline(presentation_topic, num_slides, engine)
-     
 
             except Exception as e:
                 st.error(f"Failed to generate outline: {e}")
@@ -285,8 +277,6 @@ def main():
                     st.session_state['slides_prompt_tokens'] = slides_prompt_tokens
                     st.session_state['slides_completion_tokens'] = slides_completion_tokens
                     st.session_state['slides_total_tokens'] = slides_total_tokens
-
-                    #st.session_state['slides_content'] = slides_content
 
     # Step 10: Show the "Create Presentation" button 
     if 'slides_content' in st.session_state and st.session_state['slides_content']:
