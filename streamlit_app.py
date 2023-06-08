@@ -38,11 +38,10 @@ def generate_slide_content(title, engine='gpt-3.5-turbo'):
         "Five detailed talking points of 30-40 words each": "talking_points"
     }
 
-    
-    slides_api_calls = 0
-    slides_prompt_tokens = 0
-    slides_completion_tokens = 0
-    slides_total_tokens = 0
+    api_calls = 0
+    prompt_tokens = 0
+    completion_tokens = 0
+    total_tokens = 0
     
     for prompt, max_tokens in prompts:
         response = openai.ChatCompletion.create(
