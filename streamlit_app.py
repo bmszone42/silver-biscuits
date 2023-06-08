@@ -112,14 +112,14 @@ def create_presentation(slides_content, company_name, presentation_name, present
 
         # Set the title
         title = slide.shapes.title
-        title.text = slide_content["crisp_title"]
+        title.text = str(slide_content["crisp_title"])
 
         # Add bullet points
         content = slide.placeholders[1]
         tf = content.text_frame
         for bullet in slide_content["bullets"]:
             p = tf.add_paragraph()
-            p.text = bullet
+            p.text = str(bullet)
 
         # Add takeaway message at the bottom left with larger font
         left = Inches(1)
@@ -131,7 +131,7 @@ def create_presentation(slides_content, company_name, presentation_name, present
         p = tf.add_paragraph()
         if isinstance(slide_content["takeaway_message"], list):
             slide_content["takeaway_message"] = slide_content["takeaway_message"][0]
-        p.text = slide_content["takeaway_message"]
+        p.text = str(slide_content["takeaway_message"])
         for paragraph in tf.paragraphs:
             for run in paragraph.runs:
                 run.font.size = Pt(20)  # Larger font size
@@ -140,7 +140,7 @@ def create_presentation(slides_content, company_name, presentation_name, present
         notes_slide = slide.notes_slide
         notes_tf = notes_slide.notes_text_frame
         for talking_point in slide_content["talking_points"]:
-            notes_tf.add_paragraph().text = talking_point
+            notes_tf.add_paragraph().text = str(talking_point)
 
     # Save the presentation
     presentation.save("SlideDeck.pptx")
