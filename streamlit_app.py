@@ -286,7 +286,7 @@ def main():
             #st.write(f"Slide Content:\n{format_slide_content(slide_content)}")
             
             create_presentation(st.session_state['slides_content'], company_name, presentation_name, presenter)
-            time.sleep(15)
+            #time.sleep(15)
             st.success('Presentation created successfully!')
             
             # Step 11: Allow the user to download the presentation with a link
