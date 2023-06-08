@@ -10,7 +10,11 @@ import time
 
 MAX_TOKENS = 4096  # Maximum tokens allowed in a single API call
 TOKENS_PER_SLIDE_ESTIMATE = 200  # Rough estimate of tokens used per slide
+slides_api_calls = 0
 slides_prompt_tokens = 0
+slides_completion_tokens = 0
+slides_total_tokens = 0
+
 
 
 # Set OpenAI API key
