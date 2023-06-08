@@ -10,12 +10,6 @@ import time
 
 MAX_TOKENS = 4096  # Maximum tokens allowed in a single API call
 TOKENS_PER_SLIDE_ESTIMATE = 200  # Rough estimate of tokens used per slide
-slides_api_calls = 0
-slides_prompt_tokens = 0
-slides_completion_tokens = 0
-slides_total_tokens = 0
-
-
 
 # Set OpenAI API key
 openai.api_key = st.secrets['OPENAI_KEY']
@@ -228,6 +222,10 @@ def main():
     setup_sidebar_style()
     
     slides_api_calls = 0
+    slides_prompt_tokens = 0  # Add this line
+    slides_completion_tokens = 0
+    slides_total_tokens = 0
+
 
     # Step 1: Allow user to enter a topic
     presentation_topic = st.sidebar.text_input('Topic for the PowerPoint Deck')
